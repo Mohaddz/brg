@@ -11,10 +11,46 @@ See `plan.md` for the full roadmap and asset inventory.
 
 ```bash
 uv sync                 # core deps: inspect-ai, datasets, numpy, openai
+uv sync --group train   # + pinned Tinker Cookbook for recipe-driven SFT
 uv sync --group helm    # + pinned crfm-helm==0.5.16 (official runner only)
 ```
 
-`TINKER_API_KEY` in env for Tinker endpoints.
+The `train` and `helm` groups are mutually exclusive because their
+dependencies conflict; the normal Inspect evaluation suite is included in
+`train`. Set `TINKER_API_KEY` for training and Tinker checkpoint evaluation,
+plus `TINKER_BASE_URL` for the OpenAI-compatible evaluation endpoint.
+
+## Recipe-driven SFT
+
+Edit `configs/sft_pilot.yaml` or `configs/sft_full.yaml` to set the model,
+Hugging Face train/validation splits, limits, renderer, LoRA and optimizer
+settings, checkpoint cadence, W&B project, and any number of benchmark jobs.
+Each job selects a suite and datasets/tracks, samples per task (`limit`),
+connections per evaluation, simultaneous checkpoint evaluations (`max_evals`),
+and cadence (`every_checkpoints`). `max_periodic_evals` caps periodic checks;
+the final checkpoint is always evaluated. Set `enabled: false` to park a job.
+
+```bash
+export TINKER_API_KEY=...
+export TINKER_BASE_URL=https://tinker.thinkingmachines.dev/services/tinker-prod/oai/api/v1
+wandb login                         # only if wandb.project is set
+uv run --group train python -m brg.run_recipe --config configs/sft_pilot.yaml --check
+uv run --group train python -m brg.run_recipe --config configs/sft_pilot.yaml
+```
+
+The launcher starts independent evaluation workers alongside training. As
+soon as an asynchronous sampler checkpoint is saved, workers evaluate it
+without blocking the training loop. After training, the launcher waits for
+final-checkpoint evaluations. Use `--train-only` or `--eval-only` to run either
+side separately. Results live under `sft.log_dir`: `checkpoints.jsonl`,
+`evals/<job>/<checkpoint>/eval.log`, and each job's `inspect/` logs. A
+restarted worker skips successful evaluations. W&B training and evaluation
+runs share the configured project/group; evaluations carry checkpoint steps.
+`eval_every: 0` keeps in-loop validation NLL disabled and skips loading the
+validation split; set it positive if you also want synchronous validation
+loss, which can pause training at that step.
+Periodic Tinker checkpoints expire after the Cookbook's default 7 days, so
+do not defer their evaluations indefinitely.
 
 ## Eval suite (Inspect)
 
@@ -39,7 +75,7 @@ temperature 0, max_tokens 100.
 ### Run it
 
 ```bash
-uv run python -m brg.eval_run --model <inspect-model-spec> [--tasks ...] [--limit N]
+uv run python -m brg.eval_run --model <inspect-model-spec> [--suite legacy|helm|balsam|najd|all] [--tasks ...] [--limit N]
 ```
 
 Any OpenAI-compatible endpoint works via Inspect's `openai-api` provider:
@@ -59,7 +95,87 @@ uv run python -m brg.eval_run --model openai-api/openrouter/qwen/qwen3-32b
 
 # a subset of tasks, small limit for smoke checks
 uv run python -m brg.eval_run --model ... --tasks arabic_mmlu,alghafa --limit 100
+
+# just HELM, just BALSAM, or one dataset
+uv run python -m brg.eval_run --model ... --suite helm
+uv run python -m brg.eval_run --model ... --suite balsam
+uv run python -m brg.eval_run --model ... --suite helm --tasks arabic_mmlu
+uv run python -m brg.eval_run --model ... --suite helm --tasks alrage --judge-model openai/gpt-4o-2024-11-20
 ```
+
+The default `legacy` suite retains the previous HELM plus BALSAM behavior.
+`--suite all` also runs Najd. `--limit` caps samples per Inspect task, and is
+passed as Najd's sample count when Najd is selected. `--max-connections` sets
+both Inspect model connections and concurrent samples, or Najd concurrency.
+
+### Najd Benchmark
+
+Najd uses the [official Najd Arena evaluator](https://github.com/najdresearch/najd-arena)
+and its certified dataset, adapters, and scoring. Set it up beside this repo:
+
+```bash
+git clone https://github.com/najdresearch/najd-arena.git ../najd-arena
+cd ../najd-arena/tui && uv sync
+cd ../../brg
+```
+
+Then run the full benchmark, a sample, or one track:
+
+```bash
+uv run python -m brg.eval_run --model openai-api/openrouter/openai/gpt-6-luna \
+    --suite najd --judge-model openai-api/openrouter/openai/gpt-4o-2024-11-20 \
+    --max-connections 32
+uv run python -m brg.eval_run --model openai-api/openrouter/openai/gpt-6-luna \
+    --suite najd --najd-track <track-name> --limit 100
+```
+
+The wrapper maps the existing `<SERVICE>_API_KEY` and `<SERVICE>_BASE_URL`
+variables to Najd's OpenAI-compatible LiteLLM provider. Najd writes
+`.najd-arena-v1/runs/<run-id>/report.json`, plus case-level grades and model
+outputs, under the current directory. Track-filtered and sampled runs are
+diagnostic; a complete run with a judge is needed for Najd's canonical score.
+Use `--najd-project <path>` if the Najd checkout is elsewhere. `--tasks`
+selects individual HELM/BALSAM datasets; `--najd-track` selects Najd tracks.
+
+### Tracking and live evaluation
+
+Set `WANDB_PROJECT=brg` (and authenticate with `wandb login`) to log Inspect
+scores and Najd's aggregate, coverage, and track scores to W&B. Related
+checkpoints can use `--wandb-group <training-run>` and `--wandb-step <step>`.
+Each CLI invocation creates one evaluation run. The Tinker cookbook supports
+training loss and evaluation logging through `wandb_project` and `wandb_name`
+when an SFT entrypoint is configured.
+
+The in-training Inspect bridge in `src/brg/tinker_eval.py` accepts
+`max_connections=128` by default. This controls concurrent Tinker sampling
+requests during those evaluations; the standalone CLI's
+`--max-connections` remains independently configurable.
+
+### Evaluate while SFT continues
+
+For nonblocking mid-training benchmarks, configure the Tinker Cookbook SFT
+run with periodic sampler checkpoints (`save_every > 0` and
+`async_periodic_saves=True`) and leave its in-loop benchmark evaluators off
+(`eval_every=0`, `evaluator_builders=[]`). The cookbook writes each completed
+checkpoint to `<sft-log-path>/checkpoints.jsonl`. Start this separate worker
+from the `brg` checkout while training runs in another process:
+
+```bash
+export TINKER_API_KEY=...
+export TINKER_BASE_URL=https://tinker.thinkingmachines.dev/services/tinker-prod/oai/api/v1
+uv run python -m brg.eval_watch --checkpoints runs/sft/<run>/checkpoints.jsonl \
+    --suite helm --tasks arabic_mmlu,aratrust --limit 500 \
+    --max-connections 128
+```
+
+The worker uses each checkpoint's `sampler_path`, evaluates without holding up
+the trainer, and keeps results in `runs/midtrain/<checkpoint>/`. Inspect logs
+and terminal output are in each checkpoint's `inspect/` and `eval.log`. It
+skips successful evaluations after a restart; failed ones retry on restart.
+`--max-evals` controls how many checkpoints are evaluated simultaneously
+(default 1). Use `--suite najd --tasks all --judge-model ...` for judged Najd
+checks. If `WANDB_PROJECT` is set, each checkpoint's scores are logged as a
+separate W&B run under the `midtrain` group with its training step.
 
 Raw `inspect eval` also works: `uv run inspect eval src/brg/tasks.py@arabic_mmlu --model ...`.
 Filter subsets per family with `-T subsets=name1,name2` (conf spelling,
@@ -69,7 +185,7 @@ underscores).
 
 ALRAGE is passage-based QA scored by a judge model — HELM's annotator pins
 `openai/gpt-4o-2024-11-20` (0–10 rubric, normalized to 0–1). It's gated behind
-a flag so nothing calls a paid judge by accident:
+a flag or explicit task selection so nothing calls a paid judge by accident:
 
 ```bash
 uv run python -m brg.eval_run --model ... --alrage

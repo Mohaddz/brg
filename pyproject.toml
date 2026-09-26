@@ -2,19 +2,26 @@
 name = "brg"
 version = "0.1.0"
 description = "Arabic LLM post-training on Tinker: SFT/RL + HELM-faithful eval suite"
-requires-python = ">=3.10,<3.13"
+requires-python = ">=3.11,<3.13"
 dependencies = [
     "inspect-ai>=0.3.84",
     "datasets>=3.0",
     "numpy>=1.26",
+    "pydantic>=2.10,<3",
+    "pyyaml>=6,<7",
     # used for the ALRAGE judge when an OpenAI-compatible endpoint is configured
     "openai>=1.50,<3",
+    "wandb>=0.19,<1",
 ]
 
 [dependency-groups]
 # Official Stanford runner, pinned like Barq-LLM's Modal job. Not installed by
 # default: `uv run --group helm python scripts/helm_arabic.py --check`
 helm = ["crfm-helm==0.5.16"]
+train = ["tinker-cookbook @ git+https://github.com/thinking-machines-lab/tinker-cookbook.git@5d6e1eb9ffb0328771bdec97a95eb509e84d43f1"]
+
+[tool.uv]
+conflicts = [[{ group = "helm" }, { group = "train" }]]
 
 [build-system]
 requires = ["hatchling"]

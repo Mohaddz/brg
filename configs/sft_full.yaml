@@ -1,0 +1,52 @@
+name: barq-sft-full
+model: nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16
+
+data:
+  dataset: Mohaddz/barq-arabic-sft-candidate
+  train_split: train
+  validation_split: validation
+  validation_limit: 512
+  shuffle_seed: 0
+
+sft:
+  log_dir: runs/sft/barq-sft-full
+  renderer: nemotron3_ultra_disable_thinking
+  batch_size: 128
+  max_length: 4096
+  learning_rate: 0.0001
+  lr_schedule: linear
+  lora_rank: 32
+  num_epochs: 1
+  save_every: 39
+  async_periodic_saves: true
+  submit_ahead: 2
+  eval_every: 0
+
+wandb:
+  project: brg
+  group: barq-sft-full
+
+evals:
+  - name: helm
+    suite: helm
+    tasks: [arabic_mmlu, madinah_qa, ht_arabic_mmlu, arabic_exams, alghafa, aratrust]
+    limit: 500
+    every_checkpoints: 2
+    max_connections: 128
+    max_evals: 2
+  - name: balsam
+    suite: balsam
+    tasks: [balsam_dev]
+    limit: 500
+    every_checkpoints: 2
+    max_connections: 128
+    max_evals: 2
+  - name: najd
+    enabled: false
+    suite: najd
+    tracks: []
+    limit: 500
+    every_checkpoints: 4
+    max_connections: 128
+    max_evals: 1
+    judge_model: openai-api/openrouter/openai/gpt-4o-2024-11-20

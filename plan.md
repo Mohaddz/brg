@@ -52,9 +52,10 @@ One Inspect suite, three ways to point it at a model:
    during implementation.
 2. **Any external OpenAI-compatible endpoint** (OpenRouter, DeepInfra, vLLM…)
    — same provider mechanism, per-endpoint env vars.
-3. **Mid-training** — `evaluator_builders` in the SFT config calling our task
-   builders on the live `SamplingClient` (cheap, frequent; pattern already
-   proven via `tinker_cookbook.eval.inspect_evaluators.InspectEvaluatorBuilder`).
+3. **Mid-training** — Tinker writes periodic sampler checkpoints; a separate
+   `brg.eval_watch` process picks them up and runs the selected Inspect/Najd
+   benchmarks while SFT continues. The in-loop `tinker_evaluator` bridge
+   remains available for focused diagnostics.
 
 Task list (all zero-shot, deterministic decoding, matching HELM's protocol):
 
@@ -98,9 +99,10 @@ OpenAI-compatible endpoint (`openai-api/<service>/<model>` + env vars).
     validation split (~512–1024 rows is plenty for a loss curve).
   - `lora_rank` 32, `learning_rate` from `hyperparam_utils.get_lr`, batch_size
     ~128 conversations, `max_length` sized from `token_count` distribution.
-  - `eval_every` / `save_every` sized so a checkpoint lands roughly every
-    ~5k examples (≈ every 39 steps at bs=128). Evals: val NLL + small Inspect
-    subset (limit ~100–200/task).
+  - `save_every` sized so a checkpoint lands roughly every ~5k examples
+    (≈ every 39 steps at bs=128), with `async_periodic_saves=True`.
+    Keep in-loop benchmark evaluators disabled; run a fixed small Inspect
+    subset from `brg.eval_watch` (limit ~100–500/task).
 - Purpose: validate pipeline, rendering, eval wiring, and the loss curve.
 
 ### Step 2 — full SFT (78,497 rows, 1 epoch to start)

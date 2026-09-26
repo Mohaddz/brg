@@ -6,7 +6,8 @@ calls don't belong on the training hot path; run it post-hoc via eval_run.
 """
 
 
-def tinker_evaluator(*, model_name, renderer_name, log_dir, limit=None, tasks=None):
+def tinker_evaluator(*, model_name, renderer_name, log_dir, limit=None, tasks=None,
+                     max_connections=128):
     """Return a cookbook evaluator builder for SFT/RL eval callbacks."""
     from tinker_cookbook.eval.inspect_evaluators import InspectEvaluatorBuilder
 
@@ -31,7 +32,7 @@ def tinker_evaluator(*, model_name, renderer_name, log_dir, limit=None, tasks=No
         limit=limit,
         temperature=0.0,
         max_tokens=helm_max_tokens(names),
-        max_connections=8,
+        max_connections=max_connections,
     )
 
 

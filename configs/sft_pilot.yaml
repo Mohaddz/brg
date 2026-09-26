@@ -1,0 +1,38 @@
+name: barq-sft-pilot
+model: nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16
+
+data:
+  dataset: Mohaddz/barq-arabic-sft-candidate
+  train_split: train
+  validation_split: validation
+  train_limit: 10000
+  validation_limit: 512
+  shuffle_seed: 0
+
+sft:
+  log_dir: runs/sft/barq-sft-pilot
+  renderer: nemotron3_ultra_disable_thinking
+  batch_size: 128
+  max_length: 4096
+  learning_rate: 0.0001
+  lr_schedule: linear
+  lora_rank: 32
+  num_epochs: 1
+  save_every: 39
+  async_periodic_saves: true
+  submit_ahead: 2
+  eval_every: 0
+
+wandb:
+  project: brg
+  group: barq-sft-pilot
+
+evals:
+  - name: helm-smoke
+    suite: helm
+    tasks: [arabic_mmlu, aratrust]
+    limit: 500
+    every_checkpoints: 1
+    max_periodic_evals: 2
+    max_connections: 128
+    max_evals: 2

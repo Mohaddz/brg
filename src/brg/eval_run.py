@@ -24,13 +24,20 @@ Examples:
 """
 
 import argparse
+import json
+import os
+from pathlib import Path
+import subprocess
 import sys
 
 from brg import tasks as brg_tasks
 from brg.helm_spec import ALRAGE_JUDGE_DEFAULT
 
 
-def _build_tasks(names, alrage, judge_model):
+HELM_TASKS = [name for name in brg_tasks.ALL_TASKS if name != "balsam_dev"]
+
+
+def _build_tasks(names, alrage, judge_model, suite="legacy"):
     builders = {
         "arabic_mmlu": brg_tasks.arabic_mmlu,
         "madinah_qa": brg_tasks.madinah_qa,
@@ -40,14 +47,78 @@ def _build_tasks(names, alrage, judge_model):
         "aratrust": brg_tasks.aratrust,
         "balsam_dev": brg_tasks.balsam_dev,
     }
-    selected = brg_tasks.ALL_TASKS if names == ["all"] else names
-    unknown = [n for n in selected if n not in builders]
+    available = {
+        "legacy": brg_tasks.ALL_TASKS + ["alrage"],
+        "helm": HELM_TASKS + ["alrage"],
+        "balsam": ["balsam_dev"],
+        "all": brg_tasks.ALL_TASKS + ["alrage"],
+    }[suite]
+    selected = [name for name in available if name != "alrage"] if names == ["all"] else names
+    unknown = [n for n in selected if n not in available]
     if unknown:
-        raise ValueError(f"Unknown tasks {unknown}; choose from {sorted(builders)} or 'all'")
-    built = [builders[name]() for name in selected]
-    if alrage:
+        raise ValueError(f"Unknown tasks {unknown}; choose from {sorted(available)} or 'all'")
+    built = [builders[name]() for name in selected if name != "alrage"]
+    if "alrage" in selected or alrage:
         built.append(brg_tasks.alrage(judge=judge_model or ALRAGE_JUDGE_DEFAULT))
     return built
+
+
+def _najd_model(spec: str):
+    if spec.startswith("openai-api/"):
+        _, service, model = spec.split("/", 2)
+        prefix = service.upper().replace("-", "_")
+        api_key_env = f"{prefix}_API_KEY"
+        api_base = os.environ.get(f"{prefix}_BASE_URL")
+        if not api_base or not os.environ.get(api_key_env):
+            raise ValueError(f"Najd requires {api_key_env} and {prefix}_BASE_URL")
+        return f"openai/{model}", api_key_env, api_base
+    if spec.startswith("openai/"):
+        return spec, "OPENAI_API_KEY", os.environ.get("OPENAI_BASE_URL")
+    raise ValueError("Najd requires an openai-api/<service>/<model> or openai/<model> spec")
+
+
+def _run_najd(args):
+    project = Path(args.najd_project).resolve()
+    if not (project / "pyproject.toml").is_file():
+        raise ValueError(f"Najd Arena project not found at {project}; clone najdresearch/najd-arena beside brg")
+    model, api_key_env, api_base = _najd_model(args.model)
+    command = ["uv", "run", "--project", str(project), "najd-arena", "run",
+               "--model", model, "--api-key-env", api_key_env,
+               "--concurrency", str(args.max_connections)]
+    if api_base:
+        command.extend(["--api-base", api_base])
+    if args.limit is not None:
+        command.extend(["--sample", str(args.limit)])
+    for track in args.najd_track:
+        command.extend(["--track", track])
+    if args.judge_model:
+        judge, judge_key_env, judge_base = _najd_model(args.judge_model)
+        command.extend(["--judge-model", judge, "--judge-api-key-env", judge_key_env])
+        if judge_base:
+            command.extend(["--judge-api-base", judge_base])
+    else:
+        print("Najd open-ended cases remain ungraded without --judge-model.", file=sys.stderr)
+    print("Najd results: .najd-arena-v1/runs/", flush=True)
+    return subprocess.run(command, check=False).returncode
+
+
+def _najd_metrics(previous_runs):
+    run_root = Path.cwd() / ".najd-arena-v1" / "runs"
+    new_runs = set(run_root.iterdir()) - previous_runs if run_root.is_dir() else set()
+    if len(new_runs) != 1:
+        return {}, None
+    run_dir = new_runs.pop()
+    report_path = run_dir / "report.json"
+    if not report_path.is_file():
+        return {}, None
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    metrics = {
+        f"najd/{name}": value
+        for name in ("najd_score", "case_weighted_score", "coverage")
+        if (value := report.get(name)) is not None
+    }
+    metrics.update({f"najd/track/{name}": value for name, value in report.get("tracks", {}).items()})
+    return metrics, report_path
 
 
 def main(argv=None):
@@ -56,8 +127,14 @@ def main(argv=None):
     parser.add_argument("--model", required=True,
                         help="Inspect model spec, e.g. openai/gpt-4o or "
                              "openai-api/<service>/<model>")
+    parser.add_argument("--suite", choices=("legacy", "helm", "balsam", "najd", "all"),
+                        default="legacy", help="benchmark suite (default: legacy HELM + BALSAM)")
     parser.add_argument("--tasks", default="all",
-                        help="comma-separated task names or 'all' (ALRAGE excluded unless --alrage)")
+                        help="comma-separated HELM/BALSAM dataset names or 'all'")
+    parser.add_argument("--najd-track", action="append", default=[],
+                        help="Najd track to run; repeat for multiple tracks (default: all)")
+    parser.add_argument("--najd-project", default="../najd-arena/tui",
+                        help="path to the official najd-arena/tui project")
     parser.add_argument("--alrage", action="store_true",
                         help="include the ALRAGE judged task (costs judge API calls)")
     parser.add_argument("--judge-model", default="",
@@ -66,28 +143,80 @@ def main(argv=None):
                         help="max samples per task (Inspect --limit)")
     parser.add_argument("--log-dir", default="runs/inspect")
     parser.add_argument("--max-connections", type=int, default=16)
+    parser.add_argument("--wandb-project", default=os.environ.get("WANDB_PROJECT", ""),
+                        help="log evaluation scores to this W&B project")
+    parser.add_argument("--wandb-group", default=None,
+                        help="group related checkpoints in W&B")
+    parser.add_argument("--wandb-step", type=int, default=None,
+                        help="training step associated with this checkpoint")
     args = parser.parse_args(argv)
 
-    from inspect_ai import eval as inspect_eval
+    if args.limit is not None and args.limit < 1:
+        parser.error("--limit must be positive")
+    if args.max_connections < 1:
+        parser.error("--max-connections must be positive")
+    if args.suite == "najd" and args.tasks != "all":
+        parser.error("use --najd-track to select Najd tracks")
+    if args.suite in ("legacy", "helm", "balsam") and args.najd_track:
+        parser.error("--najd-track requires --suite najd or --suite all")
+    if args.suite in ("balsam", "najd") and args.alrage:
+        parser.error("--alrage requires a HELM suite")
 
-    names = [n.strip() for n in args.tasks.split(",") if n.strip()]
-    built = _build_tasks(names, args.alrage, args.judge_model)
-    results = inspect_eval(
-        built,
-        model=args.model,
-        limit=args.limit,
-        log_dir=args.log_dir,
-        max_connections=args.max_connections,
-        max_samples=args.max_connections,
-    )
-    for result in results:
-        scores = {
-            metric.name: metric.value
-            for score in (result.results.scores if result.results else [])
-            for metric in score.metrics.values()
-        }
-        print(f"{result.eval.task}: {scores}")
-    return 0 if all(r.status == "success" for r in results) else 1
+    wandb_run = None
+    if args.wandb_project:
+        import wandb
+
+        wandb_run = wandb.init(
+            project=args.wandb_project,
+            group=args.wandb_group,
+            job_type="evaluation",
+            config={"model": args.model, "judge_model": args.judge_model,
+                    "suite": args.suite, "tasks": args.tasks, "limit": args.limit,
+                    "max_connections": args.max_connections,
+                    "najd_tracks": args.najd_track},
+        )
+    try:
+        status = 0
+        metrics = {}
+        if args.suite != "najd":
+            from inspect_ai import eval as inspect_eval
+
+            names = [name.strip() for name in args.tasks.split(",") if name.strip()]
+            built = _build_tasks(names, args.alrage, args.judge_model, args.suite)
+            results = inspect_eval(
+                built,
+                model=args.model,
+                limit=args.limit,
+                log_dir=args.log_dir,
+                max_connections=args.max_connections,
+                max_samples=args.max_connections,
+            )
+            for result in results:
+                scores = {
+                    metric.name: metric.value
+                    for score in (result.results.scores if result.results else [])
+                    for metric in score.metrics.values()
+                }
+                print(f"{result.eval.task}: {scores}")
+                metrics.update({f"inspect/{result.eval.task}/{name}": value
+                                for name, value in scores.items()})
+            status = 0 if all(result.status == "success" for result in results) else 1
+        if args.suite in ("najd", "all"):
+            run_root = Path.cwd() / ".najd-arena-v1" / "runs"
+            previous_runs = set(run_root.iterdir()) if run_root.is_dir() else set()
+            status = max(status, _run_najd(args))
+            najd_scores, report_path = _najd_metrics(previous_runs)
+            metrics.update(najd_scores)
+            if report_path:
+                print(f"Najd report: {report_path}")
+                if wandb_run:
+                    wandb_run.summary["najd_report"] = str(report_path)
+        if wandb_run and metrics:
+            wandb_run.log(metrics, step=args.wandb_step)
+        return status
+    finally:
+        if wandb_run:
+            wandb_run.finish()
 
 
 if __name__ == "__main__":
