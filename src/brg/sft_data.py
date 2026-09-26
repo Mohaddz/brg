@@ -6,12 +6,44 @@ from pathlib import Path
 
 from brg.chat_data import load_chat_dataset
 
-from tinker_cookbook.renderers import TrainOnWhat
+from tinker_cookbook.renderers import ToolCall, TrainOnWhat, UnparsedToolCall
+from tinker_cookbook.supervised.common import datum_from_model_input_weights
 from tinker_cookbook.supervised.data import (
     SupervisedDatasetFromHFDataset,
-    conversation_to_datum,
 )
 from tinker_cookbook.supervised.types import ChatDatasetBuilder
+
+
+def _normalize_tool_call(value):
+    if isinstance(value, ToolCall):
+        return value
+    value = dict(value)
+    function = dict(value["function"])
+    if function.get("arguments") is None:
+        function["arguments"] = "{}"
+    elif not isinstance(function["arguments"], str):
+        function["arguments"] = json.dumps(function["arguments"], ensure_ascii=False)
+    value["function"] = function
+    return ToolCall.model_validate(value)
+
+
+def _normalize_message(message):
+    normalized = {
+        key: value for key, value in message.items()
+        if key != "reasoning_content" and value is not None
+    }
+    normalized.setdefault("content", "")
+    if "tool_calls" in normalized:
+        normalized["tool_calls"] = [
+            _normalize_tool_call(call) for call in normalized["tool_calls"]
+        ]
+    if "unparsed_tool_calls" in normalized:
+        normalized["unparsed_tool_calls"] = [
+            call if isinstance(call, UnparsedToolCall)
+            else UnparsedToolCall.model_validate(call)
+            for call in normalized["unparsed_tool_calls"]
+        ]
+    return normalized
 
 
 @chz.chz
@@ -38,22 +70,28 @@ class HFDatasetBuilder(ChatDatasetBuilder):
             self.common_config.train_on_what or TrainOnWhat.ALL_ASSISTANT_MESSAGES
         )
 
-        def to_datum(row):
+        def to_datums(row):
             messages = (
                 json.loads(row["messages_json"])
                 if self.raw_jsonl else row["messages"]
             )
             if not isinstance(messages, list) or not messages:
                 raise ValueError("each SFT row must contain a nonempty messages list")
-            messages = [
-                {key: value for key, value in message.items()
-                 if key != "reasoning_content" and value is not None}
-                for message in messages
+            messages = [_normalize_message(message) for message in messages]
+            examples = renderer.build_supervised_examples(
+                messages, train_on_what=train_on_what
+            )
+            if not examples:
+                raise ValueError("each SFT row must contain an assistant message")
+            return [
+                datum_from_model_input_weights(
+                    model_input, weights, max_length, reduction="mean"
+                )
+                for model_input, weights in examples
             ]
-            return conversation_to_datum(messages, renderer, max_length, train_on_what)
 
         train_dataset = SupervisedDatasetFromHFDataset(
-            train_rows, self.common_config.batch_size, map_fn=to_datum
+            train_rows, self.common_config.batch_size, flatmap_fn=to_datums
         )
         if len(train_dataset) == 0:
             raise ValueError("train split has fewer rows than batch_size")
@@ -76,7 +114,7 @@ class HFDatasetBuilder(ChatDatasetBuilder):
                     range(min(self.validation_limit, len(validation_rows)))
                 )
             validation_dataset = SupervisedDatasetFromHFDataset(
-                validation_rows, self.common_config.batch_size, map_fn=to_datum
+                validation_rows, self.common_config.batch_size, flatmap_fn=to_datums
             )
             if len(validation_dataset) == 0:
                 raise ValueError("validation split has fewer rows than batch_size")
