@@ -3,6 +3,7 @@ model: nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16
 
 data:
   dataset: Mohaddz/barq-arabic-sft-candidate
+  raw_jsonl: true
   train_split: train
   validation_split: validation
   train_limit: 10000

@@ -3,7 +3,8 @@
 import chz
 import json
 from pathlib import Path
-from datasets import load_dataset
+
+from brg.chat_data import load_chat_dataset
 
 from tinker_cookbook.renderers import TrainOnWhat
 from tinker_cookbook.supervised.data import (
@@ -16,6 +17,7 @@ from tinker_cookbook.supervised.types import ChatDatasetBuilder
 @chz.chz
 class HFDatasetBuilder(ChatDatasetBuilder):
     dataset: str
+    raw_jsonl: bool = False
     train_split: str = "train"
     validation_split: str | None = "validation"
     train_limit: int | None = None
@@ -25,7 +27,7 @@ class HFDatasetBuilder(ChatDatasetBuilder):
     max_steps: int | None = None
 
     def __call__(self):
-        train_rows = load_dataset(self.dataset, split=self.train_split)
+        train_rows = load_chat_dataset(self.dataset, self.train_split, self.raw_jsonl)
         train_rows = train_rows.shuffle(seed=self.shuffle_seed)
         if self.train_limit is not None:
             train_rows = train_rows.select(range(min(self.train_limit, len(train_rows))))
@@ -37,9 +39,17 @@ class HFDatasetBuilder(ChatDatasetBuilder):
         )
 
         def to_datum(row):
-            messages = row["messages"]
+            messages = (
+                json.loads(row["messages_json"])
+                if self.raw_jsonl else row["messages"]
+            )
             if not isinstance(messages, list) or not messages:
                 raise ValueError("each SFT row must contain a nonempty messages list")
+            messages = [
+                {key: value for key, value in message.items()
+                 if key != "reasoning_content" and value is not None}
+                for message in messages
+            ]
             return conversation_to_datum(messages, renderer, max_length, train_on_what)
 
         train_dataset = SupervisedDatasetFromHFDataset(
@@ -57,7 +67,9 @@ class HFDatasetBuilder(ChatDatasetBuilder):
 
         validation_dataset = None
         if self.validation_split is not None:
-            validation_rows = load_dataset(self.dataset, split=self.validation_split)
+            validation_rows = load_chat_dataset(
+                self.dataset, self.validation_split, self.raw_jsonl
+            )
             validation_rows = validation_rows.shuffle(seed=self.shuffle_seed)
             if self.validation_limit is not None:
                 validation_rows = validation_rows.select(

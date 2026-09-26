@@ -12,6 +12,7 @@ class RecipeSection(BaseModel):
 
 class DataConfig(RecipeSection):
     dataset: str
+    raw_jsonl: bool = False
     train_split: str = "train"
     validation_split: str | None = "validation"
     train_limit: int | None = Field(default=None, gt=0)

@@ -36,6 +36,10 @@ with the inference URL in `TINKER_BASE_URL` is corrected automatically.
 Edit `configs/sft_pilot.yaml` or `configs/sft_full.yaml` to set the model,
 Hugging Face train/validation splits, limits, renderer, LoRA and optimizer
 settings, checkpoint cadence, W&B project, and any number of benchmark jobs.
+The Barq recipes set `data.raw_jsonl: true` because some messages include an
+optional `reasoning_content` field that Hugging Face's JSON schema inference
+cannot cast consistently. The loader reads `data/<split>.jsonl` directly,
+preserves every row, and ignores that field for the disable-thinking renderer.
 Each job selects a suite and datasets/tracks, samples per task (`limit`),
 connections per evaluation, simultaneous checkpoint evaluations (`max_evals`),
 and cadence (`every_checkpoints`). `max_periodic_evals` caps periodic checks;

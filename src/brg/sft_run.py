@@ -35,6 +35,7 @@ def main(argv=None):
     builder = HFDatasetBuilder(
         common_config=common_config,
         dataset=recipe.data.dataset,
+        raw_jsonl=recipe.data.raw_jsonl,
         train_split=recipe.data.train_split,
         validation_split=(recipe.data.validation_split if recipe.sft.eval_every else None),
         train_limit=recipe.data.train_limit,
