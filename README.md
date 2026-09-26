@@ -67,6 +67,10 @@ better) in the named W&B training runs alongside the benchmark trends; choose
 the full-run batch size and learning rate only after these pilots complete.
 For the batch-size comparison, step 78 at batch 64 corresponds to step 39 at
 batch 128 in training rows seen.
+Each pilot also evaluates the same deterministic 500-case Najd sample with the
+OpenRouter judge at base, midpoint, and final. Sampled Najd scores are
+diagnostic rather than canonical leaderboard scores. Set up the pinned Najd
+checkout and OpenRouter credentials before launching a pilot.
 
 Each training launch reserves a fresh run directory: the configured `log_dir`
 first, then `-v2`, `-v3`, and so on. It saves the effective configuration as

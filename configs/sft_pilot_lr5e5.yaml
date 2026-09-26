@@ -40,3 +40,16 @@ evals:
     max_periodic_evals: 2
     max_connections: 128
     max_evals: 2
+  - name: najd-smoke
+    evaluate_base: true
+    suite: najd
+    najd_project: ../najd-arena/tui
+    tracks: []
+    limit: 500
+    max_tokens: 57344
+    disable_thinking: true
+    every_checkpoints: 1
+    max_periodic_evals: 1
+    max_connections: 128
+    max_evals: 1
+    judge_model: openai-api/openrouter/openai/gpt-6-luna
