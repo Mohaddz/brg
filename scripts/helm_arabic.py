@@ -28,6 +28,8 @@ import subprocess
 import sys
 import tempfile
 
+from brg.env import load_environment
+
 REPO = Path(__file__).resolve().parents[1]
 CONFIG = REPO / "references" / "helm-arabic-v0.5.16"
 OUTPUT_ROOT = REPO / "runs" / "helm-arabic"
@@ -65,6 +67,7 @@ def _credentials_dir():
 
 
 def main():
+    load_environment()
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--check", action="store_true",

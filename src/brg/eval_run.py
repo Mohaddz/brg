@@ -33,6 +33,7 @@ import subprocess
 import sys
 
 from brg import tasks as brg_tasks
+from brg.env import load_environment
 from brg.helm_spec import ALRAGE_JUDGE_DEFAULT
 
 
@@ -124,6 +125,7 @@ def _najd_metrics(previous_runs):
 
 
 def main(argv=None):
+    load_environment()
     parser = argparse.ArgumentParser(prog="brg-eval", description=__doc__,
                                    formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--model", required=True,

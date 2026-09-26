@@ -10,6 +10,8 @@ import subprocess
 import sys
 import time
 
+from brg.env import load_environment
+
 
 def _checkpoints(path):
     if not path.is_file():
@@ -170,6 +172,7 @@ def _watch(args):
 
 
 def main(argv=None):
+    load_environment()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoints", type=Path, required=True,
                         help="Tinker Cookbook log directory's checkpoints.jsonl")

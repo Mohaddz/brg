@@ -291,6 +291,7 @@ dependencies = [
     { name = "numpy", version = "2.5.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12' or (extra == 'group-3-brg-helm' and extra == 'group-3-brg-train')" },
     { name = "openai" },
     { name = "pydantic" },
+    { name = "python-dotenv" },
     { name = "pyyaml" },
     { name = "wandb" },
 ]
@@ -310,6 +311,7 @@ requires-dist = [
     { name = "numpy", specifier = ">=1.26" },
     { name = "openai", specifier = ">=1.50,<3" },
     { name = "pydantic", specifier = ">=2.10,<3" },
+    { name = "python-dotenv", specifier = ">=1.0,<2" },
     { name = "pyyaml", specifier = ">=6,<7" },
     { name = "wandb", specifier = ">=0.19,<1" },
 ]

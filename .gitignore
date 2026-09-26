@@ -1,5 +1,8 @@
 runs/
 .najd-arena-v1/
 .venv/
+.env
+.env.*
+!.env.example
 __pycache__/
 *.egg-info/

@@ -12,6 +12,7 @@ import time
 from types import SimpleNamespace
 
 from brg.eval_watch import _command_hash, _eval_command
+from brg.env import load_environment
 from brg.recipe import load_recipe
 
 
@@ -244,6 +245,7 @@ def _run(recipe_path, recipe, train_only=False, eval_only=False):
 
 
 def main(argv=None):
+    load_environment()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, required=True)
     parser.add_argument("--check", action="store_true", help="validate and print the plan only")

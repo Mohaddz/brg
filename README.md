@@ -17,8 +17,16 @@ uv sync --group helm    # + pinned crfm-helm==0.5.16 (official runner only)
 
 The `train` and `helm` groups are mutually exclusive because their
 dependencies conflict; the normal Inspect evaluation suite is included in
-`train`. Set `TINKER_API_KEY` for training and Tinker checkpoint evaluation,
-plus `TINKER_BASE_URL` for the OpenAI-compatible evaluation endpoint.
+`train`. Create a local secrets file and fill in the keys you use:
+
+```bash
+cp .env.example .env
+```
+
+`.env` is Git-ignored. The recipe, standalone evaluation, checkpoint watcher,
+SFT worker, and official HELM script load it automatically. Existing shell
+environment variables take precedence. The full recipe needs Tinker,
+OpenRouter, and W&B credentials; `HF_TOKEN` is optional.
 
 ## Recipe-driven SFT
 
@@ -33,9 +41,6 @@ same benchmark against the unfine-tuned base model at step 0. Set
 `enabled: false` to park a job.
 
 ```bash
-export TINKER_API_KEY=...
-export TINKER_BASE_URL=https://tinker.thinkingmachines.dev/services/tinker-prod/oai/api/v1
-wandb login                         # only if wandb.project is set
 uv run --group train python -m brg.run_recipe --config configs/sft_pilot.yaml --check
 uv run --group train python -m brg.run_recipe --config configs/sft_pilot.yaml
 ```
