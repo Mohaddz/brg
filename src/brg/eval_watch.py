@@ -53,6 +53,7 @@ def _eval_command(args, record, output_dir):
         "--suite", args.suite,
         "--tasks", args.tasks,
         "--limit", str(args.limit),
+        "--max-tokens", str(args.max_tokens),
         "--max-connections", str(args.max_connections),
         "--log-dir", str(output_dir / "inspect"),
         "--metrics-file", str(output_dir / "metrics.json"),
@@ -61,8 +62,8 @@ def _eval_command(args, record, output_dir):
         command.extend(["--judge-model", args.judge_model])
     if args.alrage:
         command.append("--alrage")
+    command.extend(["--wandb-project", args.wandb_project])
     if args.wandb_project:
-        command.extend(["--wandb-project", args.wandb_project])
         command.extend(["--wandb-group", args.wandb_group])
         step = _training_step(record, args.dataset_info)
         if isinstance(step, int) and step >= 0:
@@ -187,6 +188,7 @@ def main(argv=None):
     parser.add_argument("--alrage", action="store_true")
     parser.add_argument("--judge-model", default="")
     parser.add_argument("--limit", type=int, default=500)
+    parser.add_argument("--max-tokens", type=int, default=32768)
     parser.add_argument("--max-connections", type=int, default=128)
     parser.add_argument("--max-evals", type=int, default=1,
                         help="maximum checkpoint evaluations running at once")
@@ -199,7 +201,7 @@ def main(argv=None):
     parser.add_argument("--wandb-project", default=os.environ.get("WANDB_PROJECT", ""))
     parser.add_argument("--wandb-group", default="midtrain")
     args = parser.parse_args(argv)
-    if (args.limit < 1 or args.max_connections < 1 or args.max_evals < 1
+    if (args.limit < 1 or args.max_tokens < 1 or args.max_connections < 1 or args.max_evals < 1
             or args.every_checkpoints < 1 or args.poll_seconds <= 0
             or (args.max_periodic_evals is not None and args.max_periodic_evals < 0)):
         parser.error("limits, concurrency, and poll interval must be positive")

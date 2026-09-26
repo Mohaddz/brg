@@ -50,6 +50,7 @@ class EvalJob(RecipeSection):
     tasks: list[str] = Field(default_factory=lambda: ["all"])
     tracks: list[str] = Field(default_factory=list)
     limit: int = Field(default=500, gt=0)
+    max_tokens: int = Field(default=32768, gt=0)
     every_checkpoints: int = Field(default=1, gt=0)
     max_periodic_evals: int | None = Field(default=None, ge=0)
     max_connections: int = Field(default=128, gt=0)

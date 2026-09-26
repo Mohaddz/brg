@@ -41,7 +41,8 @@ optional `reasoning_content` field that Hugging Face's JSON schema inference
 cannot cast consistently. The loader reads `data/<split>.jsonl` directly,
 preserves every row, and ignores that field for the disable-thinking renderer.
 Each job selects a suite and datasets/tracks, samples per task (`limit`),
-connections per evaluation, simultaneous checkpoint evaluations (`max_evals`),
+Inspect output tokens (`max_tokens`, default 32,768), connections per
+evaluation, simultaneous checkpoint evaluations (`max_evals`),
 and cadence (`every_checkpoints`). `max_periodic_evals` caps periodic checks;
 the final checkpoint is always evaluated. `evaluate_base: true` starts the
 same benchmark against the unfine-tuned base model at step 0. Set
@@ -67,13 +68,18 @@ final-checkpoint evaluations. Use `--train-only` or `--eval-only` to run either
 side separately. Results live under `sft.log_dir`: `checkpoints.jsonl`,
 `evals/<job>/base/eval.log`, `evals/<job>/<checkpoint>/eval.log`, and each
 evaluation's `metrics.json` and `inspect/` logs. A restarted worker skips
-successful evaluations. W&B training and individual evaluation runs share
-the configured project/group. A separate `<recipe>-eval-trends` run charts
+successful evaluations. Each recipe creates one W&B training run and one
+`<recipe>-eval-trends` run; individual evaluation details stay in local logs
+instead of creating extra W&B runs. Filter the workspace to the trends run.
+That run charts
 the base and checkpoint scores against `train_step`: individual HELM tasks,
 HELM's unweighted mean across selected tasks, BALSAM, Najd, and the three
-suite headlines under `overview/`, including one combined live line chart.
+suite headlines under `overview/`, including `overview/score_chart` and
+`charts/helm_datasets` with training step on the horizontal axis.
 The mean is a diagnostic, not an official
 HELM leaderboard score. Najd's score is canonical only for a complete run.
+The 32,768-token setting applies to Inspect tasks, not Najd: the external Najd
+CLI has its own 1,024-token output setting without a CLI override.
 `eval_every: 0` keeps in-loop validation NLL disabled and skips loading the
 validation split; set it positive if you also want synchronous validation
 loss, which can pause training at that step.

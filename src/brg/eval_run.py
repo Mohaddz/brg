@@ -147,6 +147,8 @@ def main(argv=None):
                         help=f"judge model spec for ALRAGE (default {ALRAGE_JUDGE_DEFAULT})")
     parser.add_argument("--limit", type=int, default=None,
                         help="max samples per task (Inspect --limit)")
+    parser.add_argument("--max-tokens", type=int, default=32768,
+                        help="output-token budget per Inspect sample (default: 32768)")
     parser.add_argument("--log-dir", default="runs/inspect")
     parser.add_argument("--metrics-file", type=Path, default=None,
                         help="write scalar scores as JSON for recipe trend logging")
@@ -161,6 +163,8 @@ def main(argv=None):
 
     if args.limit is not None and args.limit < 1:
         parser.error("--limit must be positive")
+    if args.max_tokens < 1:
+        parser.error("--max-tokens must be positive")
     if args.max_connections < 1:
         parser.error("--max-connections must be positive")
     if args.suite == "najd" and args.tasks != "all":
@@ -180,6 +184,7 @@ def main(argv=None):
             job_type="evaluation",
             config={"model": args.model, "judge_model": args.judge_model,
                     "suite": args.suite, "tasks": args.tasks, "limit": args.limit,
+                    "max_tokens": args.max_tokens,
                     "max_connections": args.max_connections,
                     "najd_tracks": args.najd_track},
         )
@@ -199,6 +204,7 @@ def main(argv=None):
                 log_dir=args.log_dir,
                 max_connections=args.max_connections,
                 max_samples=args.max_connections,
+                max_tokens=args.max_tokens,
             )
             for result in results:
                 scores = {

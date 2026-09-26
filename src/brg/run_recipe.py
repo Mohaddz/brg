@@ -52,11 +52,12 @@ def _watch_command(recipe, job):
         "--suite", job.suite,
         "--tasks", ",".join(job.tasks),
         "--limit", str(job.limit),
+        "--max-tokens", str(job.max_tokens),
         "--every-checkpoints", str(job.every_checkpoints),
         "--max-connections", str(job.max_connections),
         "--max-evals", str(job.max_evals),
         "--stop-after-final",
-        "--wandb-project", recipe.wandb.project or "",
+        "--wandb-project", "",
         "--wandb-group", recipe.wandb.group or recipe.name,
     ]
     if job.max_periodic_evals is not None:
@@ -75,8 +76,9 @@ def _watch_command(recipe, job):
 def _eval_args(recipe, job):
     return SimpleNamespace(
         suite=job.suite, tasks=",".join(job.tasks), limit=job.limit,
+        max_tokens=job.max_tokens,
         max_connections=job.max_connections, judge_model=job.judge_model,
-        alrage=job.alrage, wandb_project=recipe.wandb.project,
+        alrage=job.alrage, wandb_project="",
         wandb_group=recipe.wandb.group or recipe.name,
         najd_project=str(Path(job.najd_project).resolve()), najd_track=job.tracks,
         dataset_info=recipe.sft.log_dir / "dataset_info.json",
@@ -127,7 +129,9 @@ def _finish_base_evaluation(job, returncode):
 def _collect_metrics(recipe, wandb_run, seen, chart_rows=None):
     enabled_jobs = {job.name: job for job in recipe.evals if job.enabled}
     chart_changed = False
-    for status_path in (recipe.sft.log_dir / "evals").glob("*/*/status.json"):
+    status_paths = list((recipe.sft.log_dir / "evals").glob("*/*/status.json"))
+    status_paths.sort(key=lambda path: json.loads(path.read_text(encoding="utf-8")).get("step", 0))
+    for status_path in status_paths:
         if status_path.parent.parent.name not in enabled_jobs:
             continue
         if status_path in seen:
@@ -168,25 +172,37 @@ def _collect_metrics(recipe, wandb_run, seen, chart_rows=None):
                 wandb_run.define_metric(name, step_metric="train_step")
             wandb_run.log({"train_step": step, **scores})
             if chart_rows is not None:
-                for suite in ("helm", "balsam", "najd"):
-                    if f"overview/{suite}" in scores:
-                        chart_rows.setdefault(suite, {})[step] = scores[f"overview/{suite}"]
-                        chart_changed = True
+                for name, value in scores.items():
+                    chart_rows.setdefault(name, {})[step] = value
+                    chart_changed = True
             print(f"Logged evaluation trends at step {step}: {status_path.parent}", flush=True)
         seen.add(status_path)
     if chart_changed:
         import wandb
 
-        series = [(suite, sorted(chart_rows[suite].items()))
-                  for suite in ("helm", "balsam", "najd") if chart_rows.get(suite)]
-        chart = wandb.plot.line_series(
-            xs=[[step for step, _ in points] for _, points in series],
-            ys=[[score for _, score in points] for _, points in series],
-            keys=[suite.upper() for suite, _ in series],
-            title="Evaluation scores vs training step",
-            xname="Training step",
-        )
-        wandb_run.log({"overview/score_chart": chart})
+        charts = {}
+        for chart_name, prefix, title in (
+            ("overview/score_chart", "overview/", "Benchmark scores vs training step"),
+            ("charts/helm_datasets", "helm/", "HELM datasets vs training step"),
+        ):
+            series = [(name, sorted(points.items())) for name, points in sorted(chart_rows.items())
+                      if name.startswith(prefix)]
+            if series:
+                charts[chart_name] = wandb.plot.line_series(
+                    xs=[[step for step, _ in points] for _, points in series],
+                    ys=[[score for _, score in points] for _, points in series],
+                    keys=[name.removeprefix(prefix) for name, _ in series],
+                    title=title,
+                    xname="Training step",
+                )
+        if charts:
+            wandb_run.log(charts)
+        for suite in ("helm", "balsam", "najd"):
+            points = chart_rows.get(f"overview/{suite}")
+            if points:
+                best_step, best_score = max(points.items(), key=lambda item: item[1])
+                wandb_run.summary[f"best/{suite}_score"] = best_score
+                wandb_run.summary[f"best/{suite}_step"] = best_step
 
 
 def _run(recipe_path, recipe, train_only=False, eval_only=False):
