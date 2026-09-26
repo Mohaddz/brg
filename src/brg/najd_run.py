@@ -27,20 +27,22 @@ def main(argv=None):
     if args.judge_model and not args.judge_api_key_env:
         parser.error("--judge-api-key-env is required with --judge-model")
 
-    if args.disable_thinking:
+    if args.disable_thinking or args.judge_model:
         from najd_arena import providers
 
         completion = providers.acompletion
 
-        async def no_thinking_completion(**kwargs):
-            if kwargs.get("model") == args.model:
+        async def configured_completion(**kwargs):
+            if args.disable_thinking and kwargs.get("model") == args.model:
                 kwargs["extra_body"] = {
                     **(kwargs.get("extra_body") or {}),
                     "reasoning_effort": False,
                 }
+            elif args.judge_model and kwargs.get("model") == args.judge_model:
+                kwargs["temperature"] = 1.0
             return await completion(**kwargs)
 
-        providers.acompletion = no_thinking_completion
+        providers.acompletion = configured_completion
 
     judge = (
         JudgeConfig(args.judge_model, args.judge_api_key_env, args.judge_api_base)

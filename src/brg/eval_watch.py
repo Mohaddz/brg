@@ -72,7 +72,7 @@ def _eval_command(args, record, output_dir):
         if isinstance(step, int) and step >= 0:
             command.extend(["--wandb-step", str(step)])
     if args.suite in ("najd", "all"):
-        command.extend(["--najd-project", args.najd_project])
+        command.extend(["--najd-project", str(args.najd_project)])
         for track in args.najd_track:
             command.extend(["--najd-track", track])
     return command
