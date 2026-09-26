@@ -25,8 +25,10 @@ Examples:
 
 import argparse
 import json
+import math
 import os
 from pathlib import Path
+from statistics import mean
 import subprocess
 import sys
 
@@ -142,6 +144,8 @@ def main(argv=None):
     parser.add_argument("--limit", type=int, default=None,
                         help="max samples per task (Inspect --limit)")
     parser.add_argument("--log-dir", default="runs/inspect")
+    parser.add_argument("--metrics-file", type=Path, default=None,
+                        help="write scalar scores as JSON for recipe trend logging")
     parser.add_argument("--max-connections", type=int, default=16)
     parser.add_argument("--wandb-project", default=os.environ.get("WANDB_PROJECT", ""),
                         help="log evaluation scores to this W&B project")
@@ -178,6 +182,7 @@ def main(argv=None):
     try:
         status = 0
         metrics = {}
+        helm_scores = []
         if args.suite != "najd":
             from inspect_ai import eval as inspect_eval
 
@@ -200,19 +205,39 @@ def main(argv=None):
                 print(f"{result.eval.task}: {scores}")
                 metrics.update({f"inspect/{result.eval.task}/{name}": value
                                 for name, value in scores.items()})
+                primary = scores.get("accuracy", scores.get("mean"))
+                if isinstance(primary, (int, float)) and math.isfinite(primary):
+                    if result.eval.task.startswith("helm_"):
+                        metrics[f"helm/{result.eval.task.removeprefix('helm_')}"] = primary
+                        helm_scores.append(primary)
+                    elif result.eval.task.startswith("balsam_"):
+                        metrics["balsam/score"] = primary
             status = 0 if all(result.status == "success" for result in results) else 1
+            if helm_scores:
+                metrics["helm/score"] = mean(helm_scores)
         if args.suite in ("najd", "all"):
             run_root = Path.cwd() / ".najd-arena-v1" / "runs"
             previous_runs = set(run_root.iterdir()) if run_root.is_dir() else set()
             status = max(status, _run_najd(args))
             najd_scores, report_path = _najd_metrics(previous_runs)
             metrics.update(najd_scores)
+            if isinstance(najd_scores.get("najd/najd_score"), (int, float)):
+                metrics["najd/score"] = najd_scores["najd/najd_score"]
             if report_path:
                 print(f"Najd report: {report_path}")
                 if wandb_run:
                     wandb_run.summary["najd_report"] = str(report_path)
         if wandb_run and metrics:
             wandb_run.log(metrics, step=args.wandb_step)
+        if args.metrics_file is not None:
+            args.metrics_file.parent.mkdir(parents=True, exist_ok=True)
+            temporary_path = args.metrics_file.with_suffix(args.metrics_file.suffix + ".tmp")
+            temporary_path.write_text(
+                json.dumps({"model": args.model, "suite": args.suite,
+                            "status": status, "metrics": metrics}, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            temporary_path.replace(args.metrics_file)
         return status
     finally:
         if wandb_run:

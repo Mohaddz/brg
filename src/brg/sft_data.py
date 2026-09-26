@@ -1,6 +1,8 @@
 """Hugging Face chat dataset adapter for the Tinker Cookbook trainer."""
 
 import chz
+import json
+from pathlib import Path
 from datasets import load_dataset
 
 from tinker_cookbook.renderers import TrainOnWhat
@@ -19,6 +21,8 @@ class HFDatasetBuilder(ChatDatasetBuilder):
     train_limit: int | None = None
     validation_limit: int | None = 512
     shuffle_seed: int = 0
+    metadata_path: str | None = None
+    max_steps: int | None = None
 
     def __call__(self):
         train_rows = load_dataset(self.dataset, split=self.train_split)
@@ -43,6 +47,13 @@ class HFDatasetBuilder(ChatDatasetBuilder):
         )
         if len(train_dataset) == 0:
             raise ValueError("train split has fewer rows than batch_size")
+        if self.metadata_path is not None:
+            path = Path(self.metadata_path)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps({"train_rows": len(train_rows),
+                                        "steps_per_epoch": len(train_dataset),
+                                        "max_steps": self.max_steps}) + "\n",
+                            encoding="utf-8")
 
         validation_dataset = None
         if self.validation_split is not None:

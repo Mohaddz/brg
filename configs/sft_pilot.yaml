@@ -29,6 +29,7 @@ wandb:
 
 evals:
   - name: helm-smoke
+    evaluate_base: true
     suite: helm
     tasks: [arabic_mmlu, aratrust]
     limit: 500

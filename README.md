@@ -28,7 +28,9 @@ settings, checkpoint cadence, W&B project, and any number of benchmark jobs.
 Each job selects a suite and datasets/tracks, samples per task (`limit`),
 connections per evaluation, simultaneous checkpoint evaluations (`max_evals`),
 and cadence (`every_checkpoints`). `max_periodic_evals` caps periodic checks;
-the final checkpoint is always evaluated. Set `enabled: false` to park a job.
+the final checkpoint is always evaluated. `evaluate_base: true` starts the
+same benchmark against the unfine-tuned base model at step 0. Set
+`enabled: false` to park a job.
 
 ```bash
 export TINKER_API_KEY=...
@@ -38,14 +40,21 @@ uv run --group train python -m brg.run_recipe --config configs/sft_pilot.yaml --
 uv run --group train python -m brg.run_recipe --config configs/sft_pilot.yaml
 ```
 
-The launcher starts independent evaluation workers alongside training. As
+The launcher starts base-model and checkpoint evaluation workers alongside
+training, so the baseline does not hold up SFT. As
 soon as an asynchronous sampler checkpoint is saved, workers evaluate it
 without blocking the training loop. After training, the launcher waits for
 final-checkpoint evaluations. Use `--train-only` or `--eval-only` to run either
 side separately. Results live under `sft.log_dir`: `checkpoints.jsonl`,
-`evals/<job>/<checkpoint>/eval.log`, and each job's `inspect/` logs. A
-restarted worker skips successful evaluations. W&B training and evaluation
-runs share the configured project/group; evaluations carry checkpoint steps.
+`evals/<job>/base/eval.log`, `evals/<job>/<checkpoint>/eval.log`, and each
+evaluation's `metrics.json` and `inspect/` logs. A restarted worker skips
+successful evaluations. W&B training and individual evaluation runs share
+the configured project/group. A separate `<recipe>-eval-trends` run charts
+the base and checkpoint scores against `train_step`: individual HELM tasks,
+HELM's unweighted mean across selected tasks, BALSAM, Najd, and the three
+suite headlines under `overview/`, including one combined live line chart.
+The mean is a diagnostic, not an official
+HELM leaderboard score. Najd's score is canonical only for a complete run.
 `eval_every: 0` keeps in-loop validation NLL disabled and skips loading the
 validation split; set it positive if you also want synchronous validation
 loss, which can pause training at that step.

@@ -44,6 +44,7 @@ class WandbConfig(RecipeSection):
 class EvalJob(RecipeSection):
     name: str
     enabled: bool = True
+    evaluate_base: bool = False
     suite: str = "helm"
     tasks: list[str] = Field(default_factory=lambda: ["all"])
     tracks: list[str] = Field(default_factory=list)

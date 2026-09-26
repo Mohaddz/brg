@@ -28,6 +28,7 @@ wandb:
 
 evals:
   - name: helm
+    evaluate_base: true
     suite: helm
     tasks: [arabic_mmlu, madinah_qa, ht_arabic_mmlu, arabic_exams, alghafa, aratrust]
     limit: 500
@@ -35,6 +36,7 @@ evals:
     max_connections: 128
     max_evals: 2
   - name: balsam
+    evaluate_base: true
     suite: balsam
     tasks: [balsam_dev]
     limit: 500
@@ -43,6 +45,7 @@ evals:
     max_evals: 2
   - name: najd
     enabled: true
+    evaluate_base: true
     suite: najd
     tracks: []
     limit: 500

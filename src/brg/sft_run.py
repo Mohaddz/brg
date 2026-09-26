@@ -38,6 +38,8 @@ def main(argv=None):
         train_limit=recipe.data.train_limit,
         validation_limit=recipe.data.validation_limit,
         shuffle_seed=recipe.data.shuffle_seed,
+        metadata_path=str(recipe.sft.log_dir / "dataset_info.json"),
+        max_steps=recipe.sft.max_steps,
     )
     config = train.Config(
         log_path=str(recipe.sft.log_dir),
