@@ -10,10 +10,38 @@ import subprocess
 import sys
 import time
 from types import SimpleNamespace
+import yaml
 
 from brg.eval_watch import _command_hash, _eval_command
 from brg.env import load_environment
 from brg.recipe import load_recipe
+
+
+def _run_directory(base: Path, eval_only: bool, check: bool) -> Path:
+    if eval_only:
+        candidates = [(1, base)]
+        for path in base.parent.glob(f"{base.name}-v*"):
+            suffix = path.name.removeprefix(f"{base.name}-v")
+            if suffix.isdigit():
+                candidates.append((int(suffix), path))
+        existing = [item for item in candidates if (item[1] / "checkpoints.jsonl").is_file()]
+        if not existing:
+            raise ValueError(f"no existing training run found for {base}")
+        return max(existing)[1]
+
+    version = 1
+    while True:
+        candidate = base if version == 1 else base.with_name(f"{base.name}-v{version}")
+        if check:
+            if not candidate.exists():
+                return candidate
+        else:
+            try:
+                candidate.mkdir(parents=True, exist_ok=False)
+                return candidate
+            except FileExistsError:
+                pass
+        version += 1
 
 
 def _watch_command(recipe, job):
@@ -255,18 +283,9 @@ def main(argv=None):
     args = parser.parse_args(argv)
     recipe_path = args.config.resolve()
     recipe = load_recipe(recipe_path)
-    print(f"Recipe: {recipe.name}; model: {recipe.model}")
-    print(f"SFT: {recipe.data.dataset} -> {recipe.sft.log_dir}; save every {recipe.sft.save_every} steps")
-    for job in recipe.evals:
-        print(f"Eval: {job.name} ({job.suite}, {','.join(job.tasks)}, "
-              f"every {job.every_checkpoints} checkpoints, limit {job.limit}, "
-              f"connections {job.max_connections}, base {job.evaluate_base})"
-              f"{' [disabled]' if not job.enabled else ''}")
-    if args.check:
-        return
-    if not args.train_only and not any(job.enabled for job in recipe.evals):
+    if not args.check and not args.train_only and not any(job.enabled for job in recipe.evals):
         parser.error("no enabled evaluation jobs; use --train-only or enable one")
-    if not args.train_only:
+    if not args.check and not args.train_only:
         for variable in ("TINKER_API_KEY", "TINKER_OAI_BASE_URL"):
             if not os.environ.get(variable):
                 parser.error(f"{variable} is required for checkpoint evaluation")
@@ -279,6 +298,28 @@ def main(argv=None):
                     for variable in (f"{service}_API_KEY", f"{service}_BASE_URL"):
                         if not os.environ.get(variable):
                             parser.error(f"{variable} is required for {job.name} judge")
+    base_dir = recipe.sft.log_dir
+    try:
+        run_dir = _run_directory(base_dir, args.eval_only, args.check)
+    except ValueError as error:
+        parser.error(str(error))
+    suffix = run_dir.name.removeprefix(base_dir.name)
+    recipe = recipe.model_copy(update={
+        "name": f"{recipe.name}{suffix}",
+        "sft": recipe.sft.model_copy(update={"log_dir": run_dir}),
+    })
+    print(f"Recipe: {recipe.name}; model: {recipe.model}")
+    print(f"SFT: {recipe.data.dataset} -> {run_dir}; save every {recipe.sft.save_every} steps")
+    for job in recipe.evals:
+        print(f"Eval: {job.name} ({job.suite}, {','.join(job.tasks)}, "
+              f"every {job.every_checkpoints} checkpoints, limit {job.limit}, "
+              f"connections {job.max_connections}, base {job.evaluate_base})"
+              f"{' [disabled]' if not job.enabled else ''}")
+    if args.check:
+        return
+    if not args.eval_only:
+        recipe_path = run_dir / "recipe.yaml"
+        recipe_path.write_text(yaml.safe_dump(recipe.model_dump(mode="json")), encoding="utf-8")
     _run(recipe_path, recipe, args.train_only, args.eval_only)
 
 

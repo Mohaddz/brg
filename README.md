@@ -52,6 +52,13 @@ uv run --group train python -m brg.run_recipe --config configs/sft_pilot.yaml --
 uv run --group train python -m brg.run_recipe --config configs/sft_pilot.yaml
 ```
 
+Each training launch reserves a fresh run directory: the configured `log_dir`
+first, then `-v2`, `-v3`, and so on. It saves the effective configuration as
+`recipe.yaml` inside that directory, so rerunning the same command does not
+resume completed training or reuse evaluation results. `--check` previews the
+next directory without creating it. `--eval-only` uses the latest existing run
+with checkpoints instead of creating a new training run.
+
 The launcher starts base-model and checkpoint evaluation workers alongside
 training, so the baseline does not hold up SFT. As
 soon as an asynchronous sampler checkpoint is saved, workers evaluate it
