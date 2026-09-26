@@ -3,7 +3,7 @@
 Every MCQ task unions the subsets from run_entries_arabic.conf, caps each
 entry at 1000 eval instances (HELM's --max-eval-instances, same np.random
 seed-0 sampling), sends the flattened HELM prompt as a single user message,
-and decodes deterministically (temperature=0, max_tokens=100).
+and decodes deterministically (temperature=0, without a task-level output cap).
 
 ALRAGE needs an LLM judge and is opt-in: `inspect eval brg/tasks.py@alrage
 -T judge=openai/gpt-4o-2024-11-20` or env BRG_ALRAGE_JUDGE=<model spec>.
@@ -19,8 +19,8 @@ from inspect_ai.solver import generate
 from brg import helm_spec
 from brg.scorers import alrage_judge, balsam, helm_mcq
 
-MCQ_CONFIG = GenerateConfig(temperature=0.0, max_tokens=helm_spec.MAX_TOKENS)
-BALSAM_CONFIG = GenerateConfig(temperature=0.0, max_tokens=512)
+MCQ_CONFIG = GenerateConfig(temperature=0.0)
+BALSAM_CONFIG = GenerateConfig(temperature=0.0)
 
 
 def _mcq_task(family: str, subsets: str = ""):

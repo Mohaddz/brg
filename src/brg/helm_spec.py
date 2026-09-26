@@ -66,8 +66,6 @@ ALRAGE_INSTRUCTIONS = "بناءً على السياقات المقترحة ال�
 
 # HELM: --max-eval-instances 1000
 MAX_EVAL_PER_ENTRY = 1000
-# HELM: temperature=0.0, max_tokens=100 for both MCQ joint and ALRAGE.
-MAX_TOKENS = 100
 
 DATASET_REVS = {
     "arabic_mmlu": ("MBZUAI/ArabicMMLU", "7aa530e2893ac420352b3f5c1a1310c010e9758b"),

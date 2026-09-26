@@ -79,8 +79,14 @@ The Inspect tasks in `src/brg/tasks.py` replicate Stanford HELM Arabic
 (`crfm-helm==0.5.16`) as closely as a non-HELM harness can: same datasets at
 the same pinned revisions, same prompt layout (Arabic letters أ/ب/ج/د/هـ,
 `arabic_mcqa` format instruction), same first-match letter extraction, same
-≤1000-instance cap per run entry (np.random seed 0). Deterministic decoding:
-temperature 0, max_tokens 100.
+≤1000-instance cap per run entry (np.random seed 0). Deterministic decoding uses
+temperature 0 without a task-level output-token cap; endpoint defaults still apply.
+This changes the decoding protocol from HELM's 100-token setting, so scores
+should not be compared directly with official HELM numbers. Recipe `limit`
+still caps evaluation samples per task (500 in both supplied recipes), and the
+HELM port still samples at most 1,000 instances per run entry. SFT `max_length`
+is a separate training-sequence truncation limit (4,096 in the supplied recipes),
+not an evaluation output limit.
 
 | Task | Source | Metric |
 | --- | --- | --- |

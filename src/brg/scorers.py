@@ -177,7 +177,7 @@ def alrage_judge(judge_model: str):
     from inspect_ai.model import ChatMessageSystem, ChatMessageUser, GenerateConfig, get_model
 
     try:
-        judge = get_model(judge_model, config=GenerateConfig(temperature=0.0, max_tokens=2000))
+        judge = get_model(judge_model, config=GenerateConfig(temperature=0.0))
     except Exception as e:
         raise ValueError(
             f"ALRAGE judge {judge_model!r} failed to initialize ({e}). For "

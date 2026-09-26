@@ -6,8 +6,8 @@ calls don't belong on the training hot path; run it post-hoc via eval_run.
 """
 
 
-def tinker_evaluator(*, model_name, renderer_name, log_dir, limit=None, tasks=None,
-                     max_connections=128):
+def tinker_evaluator(*, model_name, renderer_name, log_dir, max_tokens, limit=None,
+                     tasks=None, max_connections=128):
     """Return a cookbook evaluator builder for SFT/RL eval callbacks."""
     from tinker_cookbook.eval.inspect_evaluators import InspectEvaluatorBuilder
 
@@ -31,11 +31,6 @@ def tinker_evaluator(*, model_name, renderer_name, log_dir, limit=None, tasks=No
         log_dir=str(log_dir),
         limit=limit,
         temperature=0.0,
-        max_tokens=helm_max_tokens(names),
+        max_tokens=max_tokens,
         max_connections=max_connections,
     )
-
-
-def helm_max_tokens(names):
-    # MCQ/ALRAGE tasks cap at HELM's 100; BALSAM needs room for generations.
-    return 512 if "balsam_dev" in names else 100
