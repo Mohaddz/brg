@@ -69,7 +69,6 @@ def main(argv=None):
     args = parser.parse_args(argv)
 
     from inspect_ai import eval as inspect_eval
-    from inspect_ai.model import GenerateConfig
 
     names = [n.strip() for n in args.tasks.split(",") if n.strip()]
     built = _build_tasks(names, args.alrage, args.judge_model)
@@ -78,7 +77,8 @@ def main(argv=None):
         model=args.model,
         limit=args.limit,
         log_dir=args.log_dir,
-        config=GenerateConfig(max_connections=args.max_connections),
+        max_connections=args.max_connections,
+        max_samples=args.max_connections,
     )
     for result in results:
         scores = {
