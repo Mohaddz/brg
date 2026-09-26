@@ -5,7 +5,7 @@ Model is an Inspect model spec. For OpenAI-compatible endpoints use the
 `<SERVICE>_API_KEY` and `<SERVICE>_BASE_URL` (uppercased service name).
 
 Tinker checkpoints are OpenAI-compatible:
-    TINKER_BASE_URL=https://tinker.thinkingmachines.dev/services/tinker-prod/oai/api/v1
+    TINKER_OAI_BASE_URL=https://tinker.thinkingmachines.dev/services/tinker-prod/oai/api/v1
     TINKER_API_KEY=...
     uv run python -m brg.eval_run \
         --model 'openai-api/tinker/tinker://<run>:train:0/sampler_weights/<step>'
@@ -126,6 +126,8 @@ def _najd_metrics(previous_runs):
 
 def main(argv=None):
     load_environment()
+    if os.environ.get("TINKER_OAI_BASE_URL"):
+        os.environ["TINKER_BASE_URL"] = os.environ["TINKER_OAI_BASE_URL"]
     parser = argparse.ArgumentParser(prog="brg-eval", description=__doc__,
                                    formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--model", required=True,

@@ -27,6 +27,9 @@ cp .env.example .env
 SFT worker, and official HELM script load it automatically. Existing shell
 environment variables take precedence. The full recipe needs Tinker,
 OpenRouter, and W&B credentials; `HF_TOKEN` is optional.
+`TINKER_BASE_URL` is the SDK training service root; `TINKER_OAI_BASE_URL`
+is the OpenAI-compatible inference URL used by evaluations. An old `.env`
+with the inference URL in `TINKER_BASE_URL` is corrected automatically.
 
 ## Recipe-driven SFT
 
@@ -98,7 +101,7 @@ Any OpenAI-compatible endpoint works via Inspect's `openai-api` provider:
 
 ```bash
 # Tinker checkpoint (OpenAI-compatible)
-export TINKER_BASE_URL=https://tinker.thinkingmachines.dev/services/tinker-prod/oai/api/v1
+export TINKER_OAI_BASE_URL=https://tinker.thinkingmachines.dev/services/tinker-prod/oai/api/v1
 export TINKER_API_KEY=...
 uv run python -m brg.eval_run \
     --model 'openai-api/tinker/tinker://<run>:train:0/sampler_weights/<step>'
@@ -176,7 +179,7 @@ from the `brg` checkout while training runs in another process:
 
 ```bash
 export TINKER_API_KEY=...
-export TINKER_BASE_URL=https://tinker.thinkingmachines.dev/services/tinker-prod/oai/api/v1
+export TINKER_OAI_BASE_URL=https://tinker.thinkingmachines.dev/services/tinker-prod/oai/api/v1
 uv run python -m brg.eval_watch --checkpoints runs/sft/<run>/checkpoints.jsonl \
     --suite helm --tasks arabic_mmlu,aratrust --limit 500 \
     --max-connections 128

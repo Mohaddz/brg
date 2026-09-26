@@ -267,7 +267,7 @@ def main(argv=None):
     if not args.train_only and not any(job.enabled for job in recipe.evals):
         parser.error("no enabled evaluation jobs; use --train-only or enable one")
     if not args.train_only:
-        for variable in ("TINKER_API_KEY", "TINKER_BASE_URL"):
+        for variable in ("TINKER_API_KEY", "TINKER_OAI_BASE_URL"):
             if not os.environ.get(variable):
                 parser.error(f"{variable} is required for checkpoint evaluation")
         for job in recipe.evals:
