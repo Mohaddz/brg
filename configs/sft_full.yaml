@@ -42,11 +42,11 @@ evals:
     max_connections: 128
     max_evals: 2
   - name: najd
-    enabled: false
+    enabled: true
     suite: najd
     tracks: []
     limit: 500
     every_checkpoints: 4
     max_connections: 128
     max_evals: 1
-    judge_model: openai-api/openrouter/openai/gpt-4o-2024-11-20
+    judge_model: openai-api/openrouter/openai/gpt-6-luna
