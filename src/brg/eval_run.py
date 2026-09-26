@@ -85,13 +85,17 @@ def _run_najd(args):
     if not (project / "pyproject.toml").is_file():
         raise ValueError(f"Najd Arena project not found at {project}; clone najdresearch/najd-arena beside brg")
     model, api_key_env, api_base = _najd_model(args.model)
-    command = ["uv", "run", "--project", str(project), "najd-arena", "run",
+    command = ["uv", "run", "--project", str(project), "python",
+               str(Path(__file__).with_name("najd_run.py").resolve()),
                "--model", model, "--api-key-env", api_key_env,
+               "--max-tokens", str(args.max_tokens),
                "--concurrency", str(args.max_connections)]
     if api_base:
         command.extend(["--api-base", api_base])
     if args.limit is not None:
         command.extend(["--sample", str(args.limit)])
+    if args.disable_thinking:
+        command.append("--disable-thinking")
     for track in args.najd_track:
         command.extend(["--track", track])
     if args.judge_model:
@@ -147,8 +151,10 @@ def main(argv=None):
                         help=f"judge model spec for ALRAGE (default {ALRAGE_JUDGE_DEFAULT})")
     parser.add_argument("--limit", type=int, default=None,
                         help="max samples per task (Inspect --limit)")
-    parser.add_argument("--max-tokens", type=int, default=32768,
-                        help="output-token budget per Inspect sample (default: 32768)")
+    parser.add_argument("--max-tokens", type=int, default=57344,
+                        help="output-token budget per sample (default: 57344)")
+    parser.add_argument("--disable-thinking", action="store_true",
+                        help="disable reasoning for Tinker chat models")
     parser.add_argument("--log-dir", default="runs/inspect")
     parser.add_argument("--metrics-file", type=Path, default=None,
                         help="write scalar scores as JSON for recipe trend logging")
@@ -165,6 +171,8 @@ def main(argv=None):
         parser.error("--limit must be positive")
     if args.max_tokens < 1:
         parser.error("--max-tokens must be positive")
+    if args.disable_thinking and not args.model.startswith("openai-api/tinker/"):
+        parser.error("--disable-thinking requires an openai-api/tinker/ model")
     if args.max_connections < 1:
         parser.error("--max-connections must be positive")
     if args.suite == "najd" and args.tasks != "all":
@@ -185,6 +193,7 @@ def main(argv=None):
             config={"model": args.model, "judge_model": args.judge_model,
                     "suite": args.suite, "tasks": args.tasks, "limit": args.limit,
                     "max_tokens": args.max_tokens,
+                    "disable_thinking": args.disable_thinking,
                     "max_connections": args.max_connections,
                     "najd_tracks": args.najd_track},
         )
@@ -197,6 +206,10 @@ def main(argv=None):
 
             names = [name.strip() for name in args.tasks.split(",") if name.strip()]
             built = _build_tasks(names, args.alrage, args.judge_model, args.suite)
+            generation_args = (
+                {"extra_body": {"reasoning_effort": False}}
+                if args.disable_thinking else {}
+            )
             results = inspect_eval(
                 built,
                 model=args.model,
@@ -205,6 +218,7 @@ def main(argv=None):
                 max_connections=args.max_connections,
                 max_samples=args.max_connections,
                 max_tokens=args.max_tokens,
+                **generation_args,
             )
             for result in results:
                 scores = {

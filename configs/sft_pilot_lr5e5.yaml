@@ -1,4 +1,4 @@
-name: barq-sft-pilot
+name: barq-sft-pilot-lr5e5
 model: nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16
 
 data:
@@ -11,11 +11,11 @@ data:
   shuffle_seed: 0
 
 sft:
-  log_dir: runs/sft/barq-sft-pilot
+  log_dir: runs/sft/barq-sft-pilot-lr5e5
   renderer: nemotron3_ultra_disable_thinking
   batch_size: 128
   max_length: 4096
-  learning_rate: 0.0001
+  learning_rate: 0.00005
   lr_schedule: linear
   lora_rank: 32
   num_epochs: 1

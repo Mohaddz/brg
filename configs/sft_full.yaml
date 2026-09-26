@@ -21,7 +21,7 @@ sft:
   save_every: 39
   async_periodic_saves: true
   submit_ahead: 2
-  eval_every: 0
+  eval_every: 78
 
 wandb:
   project: brg
@@ -33,6 +33,8 @@ evals:
     suite: helm
     tasks: [arabic_mmlu, madinah_qa, ht_arabic_mmlu, arabic_exams, alghafa, aratrust]
     limit: 500
+    max_tokens: 57344
+    disable_thinking: true
     every_checkpoints: 2
     max_connections: 128
     max_evals: 2
@@ -41,6 +43,8 @@ evals:
     suite: balsam
     tasks: [balsam_dev]
     limit: 500
+    max_tokens: 57344
+    disable_thinking: true
     every_checkpoints: 2
     max_connections: 128
     max_evals: 2
@@ -48,8 +52,11 @@ evals:
     enabled: true
     evaluate_base: true
     suite: najd
+    najd_project: ../najd-arena/tui
     tracks: []
-    limit: 500
+    limit: null
+    max_tokens: 57344
+    disable_thinking: true
     every_checkpoints: 4
     max_connections: 128
     max_evals: 1

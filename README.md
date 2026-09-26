@@ -40,18 +40,33 @@ The Barq recipes set `data.raw_jsonl: true` because some messages include an
 optional `reasoning_content` field that Hugging Face's JSON schema inference
 cannot cast consistently. The loader reads `data/<split>.jsonl` directly,
 preserves every row, and ignores that field for the disable-thinking renderer.
-Each job selects a suite and datasets/tracks, samples per task (`limit`),
-Inspect output tokens (`max_tokens`, default 32,768), connections per
+Each job selects a suite and datasets/tracks, samples per task (`limit`, or
+`null` for all), model output tokens (`max_tokens`, default 57,344), connections per
 evaluation, simultaneous checkpoint evaluations (`max_evals`),
 and cadence (`every_checkpoints`). `max_periodic_evals` caps periodic checks;
 the final checkpoint is always evaluated. `evaluate_base: true` starts the
 same benchmark against the unfine-tuned base model at step 0. Set
 `enabled: false` to park a job.
+The supplied recipes set `disable_thinking: true` for Tinker model calls, matching
+the `nemotron3_ultra_disable_thinking` training renderer. This sends Tinker's
+boolean `reasoning_effort: false` on chat completions; judges are unchanged.
 
 ```bash
 uv run --group train python -m brg.run_recipe --config configs/sft_pilot.yaml --check
 uv run --group train python -m brg.run_recipe --config configs/sft_pilot.yaml
 ```
+
+Pilot comparisons use one-variable-at-a-time recipes:
+`configs/sft_pilot.yaml` (batch 128, LR 1e-4),
+`configs/sft_pilot_b64.yaml` (batch 64, LR 1e-4), and
+`configs/sft_pilot_lr5e5.yaml` (batch 128, LR 5e-5). All train on the same
+10,000 shuffled rows and save at roughly 5,000 rows and at the end. Validation
+NLL uses 512 held-out rows every 5,000 training rows in pilot recipes and
+about every 10,000 rows in the full recipe. Compare `test/nll` (lower is
+better) in the named W&B training runs alongside the benchmark trends; choose
+the full-run batch size and learning rate only after these pilots complete.
+For the batch-size comparison, step 78 at batch 64 corresponds to step 39 at
+batch 128 in training rows seen.
 
 Each training launch reserves a fresh run directory: the configured `log_dir`
 first, then `-v2`, `-v3`, and so on. It saves the effective configuration as
@@ -78,11 +93,14 @@ suite headlines under `overview/`, including `overview/score_chart` and
 `charts/helm_datasets` with training step on the horizontal axis.
 The mean is a diagnostic, not an official
 HELM leaderboard score. Najd's score is canonical only for a complete run.
-The 32,768-token setting applies to Inspect tasks, not Najd: the external Najd
-CLI has its own 1,024-token output setting without a CLI override.
-`eval_every: 0` keeps in-loop validation NLL disabled and skips loading the
-validation split; set it positive if you also want synchronous validation
-loss, which can pause training at that step.
+The 57,344-token setting applies to Inspect and Najd model outputs. The Najd
+integration calls Najd's official engine through `brg.najd_run` to avoid its
+CLI's fixed 1,024-token default; Najd's judge retains its own small JSON-output
+budget. For the 64K-context Nemotron model, prompt and output tokens share the
+context, so long prompts may still exceed its limit. Held-out validation NLL
+runs in Tinker's training loop and can briefly pause training at each interval.
+The full Najd job uses `limit: null`, allowing a complete, canonical run with
+its configured judge rather than a 500-case diagnostic sample.
 Periodic Tinker checkpoints expire after the Cookbook's default 7 days, so
 do not defer their evaluations indefinitely.
 
@@ -155,9 +173,14 @@ and its certified dataset, adapters, and scoring. Set it up beside this repo:
 
 ```bash
 git clone https://github.com/najdresearch/najd-arena.git ../najd-arena
+git -C ../najd-arena checkout 6918d111d64953408e4451bfcf23bcda1261fa59
 cd ../najd-arena/tui && uv sync
 cd ../../brg
 ```
+
+Run that setup on the VM before starting `configs/sft_full.yaml`; the Najd
+checkout at `../najd-arena/tui` is required by its enabled Najd job. The
+OpenRouter judge also needs `OPENROUTER_API_KEY` and `OPENROUTER_BASE_URL`.
 
 Then run the full benchmark, a sample, or one track:
 

@@ -1,4 +1,4 @@
-name: barq-sft-pilot
+name: barq-sft-pilot-b64
 model: nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16
 
 data:
@@ -11,18 +11,18 @@ data:
   shuffle_seed: 0
 
 sft:
-  log_dir: runs/sft/barq-sft-pilot
+  log_dir: runs/sft/barq-sft-pilot-b64
   renderer: nemotron3_ultra_disable_thinking
-  batch_size: 128
+  batch_size: 64
   max_length: 4096
   learning_rate: 0.0001
   lr_schedule: linear
   lora_rank: 32
   num_epochs: 1
-  save_every: 39
+  save_every: 78
   async_periodic_saves: true
   submit_ahead: 2
-  eval_every: 39
+  eval_every: 78
 
 wandb:
   project: brg

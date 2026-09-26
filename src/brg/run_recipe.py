@@ -51,7 +51,6 @@ def _watch_command(recipe, job):
         "--output-dir", str((recipe.sft.log_dir / "evals" / job.name).resolve()),
         "--suite", job.suite,
         "--tasks", ",".join(job.tasks),
-        "--limit", str(job.limit),
         "--max-tokens", str(job.max_tokens),
         "--every-checkpoints", str(job.every_checkpoints),
         "--max-connections", str(job.max_connections),
@@ -60,10 +59,14 @@ def _watch_command(recipe, job):
         "--wandb-project", "",
         "--wandb-group", recipe.wandb.group or recipe.name,
     ]
+    if job.limit is not None:
+        command.extend(["--limit", str(job.limit)])
     if job.max_periodic_evals is not None:
         command.extend(["--max-periodic-evals", str(job.max_periodic_evals)])
     if job.alrage:
         command.append("--alrage")
+    if job.disable_thinking:
+        command.append("--disable-thinking")
     if job.judge_model:
         command.extend(["--judge-model", job.judge_model])
     if job.suite in ("najd", "all"):
@@ -77,6 +80,7 @@ def _eval_args(recipe, job):
     return SimpleNamespace(
         suite=job.suite, tasks=",".join(job.tasks), limit=job.limit,
         max_tokens=job.max_tokens,
+        disable_thinking=job.disable_thinking,
         max_connections=job.max_connections, judge_model=job.judge_model,
         alrage=job.alrage, wandb_project="",
         wandb_group=recipe.wandb.group or recipe.name,
@@ -328,7 +332,7 @@ def main(argv=None):
     print(f"SFT: {recipe.data.dataset} -> {run_dir}; save every {recipe.sft.save_every} steps")
     for job in recipe.evals:
         print(f"Eval: {job.name} ({job.suite}, {','.join(job.tasks)}, "
-              f"every {job.every_checkpoints} checkpoints, limit {job.limit}, "
+              f"every {job.every_checkpoints} checkpoints, limit {job.limit or 'all'}, "
               f"connections {job.max_connections}, base {job.evaluate_base})"
               f"{' [disabled]' if not job.enabled else ''}")
     if args.check:
