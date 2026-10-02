@@ -22,6 +22,8 @@ repairs flagged chats and exports passing rows separately. It has a 1,000-word
 answer ceiling and supports up to 100 workers. See [pipeline details](docs/LIGHTWEIGHT.md).
 Completed pilots describe their original settings and remain historical.
 
+For the 500-chat pilot and 15k target, see the [scale workflow](docs/SCALE.md).
+
 From `/root/brg`, inspect a recipe without paid calls:
 
 ```sh
