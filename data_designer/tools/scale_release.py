@@ -390,6 +390,7 @@ def package(directory,target=15000):
     rows=screen_context(directory,accepted_rows(directory))
     if len(rows)<target:
         raise ValueError('Release target has not been achieved')
+    passing_count=len(rows)
     rows=rows[:target]
     (directory/'salfah_reviewed.jsonl').write_text(''.join(json.dumps(r,ensure_ascii=False)+'\n' for r in rows),encoding='utf-8')
     context_reviews=json.loads((directory/'context_verdicts.json').read_text()) if (directory/'context_verdicts.json').exists() else {}
@@ -417,6 +418,11 @@ def package(directory,target=15000):
         'model_reviewed':sum(r['selective_review'] is not None or str(r['seed_index']) in context_reviews for r in rows),
         'median_answer_words':statistics.median(len(m['content'].split()) for r in rows for m in r['conversation']['messages'][1::2])}
     atomic_json(release/'generation_report.json',metrics)
+    progress_path=directory/'progress.json'
+    progress=json.loads(progress_path.read_text()) if progress_path.exists() else {}
+    progress.update(passing=passing_count,selected=target,release_prepared=True,
+        context_excluded=metrics['context_excluded'],total_provider_cost_usd=metrics['provider_cost_usd'])
+    atomic_json(progress_path,progress)
     card='''---
 language:
 - ar
