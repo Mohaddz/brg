@@ -8,9 +8,9 @@ Datasets, request caches, research and release artifacts stay on the VM under
 
 ```sh
 .venv-hybrid/bin/python data_designer/run.py scale_release prepare
+.venv-hybrid/bin/python data_designer/run.py scale_release screen
 .venv-hybrid/bin/python data_designer/run.py scale_release pilot
-.venv-hybrid/bin/python data_designer/run.py scale_release generate --target 15000
-.venv-hybrid/bin/python data_designer/run.py scale_release package --target 15000
+.venv-hybrid/bin/python data_designer/run.py scale_release release --target 15000
 ```
 
 Preparation authors 30 additional topic areas in each of 19 broad categories,
@@ -31,6 +31,8 @@ reach 15,000 passing chats. Generation and repairs use 100 workers. Every batch
 checks all rows and model-reviews a reproducible 20% sample plus brief answers,
 flagged/repaired chats. Cross-batch clone detection excludes new duplicates.
 There are no manual content correction stages.
+The `release` command also runs final context screening and packaging, generating
+replacements if needed. `generate` and `package` remain available as separate steps.
 
 Useful formatting is assessed contextually in model reviews. Plain prose and
 drafts are allowed; Markdown absence alone never triggers a paid repair.

@@ -14,10 +14,17 @@ from decimal import Decimal
 from unittest.mock import patch
 
 from lightweight import Requests
-from scale_release import NoveltyIndex, RESEARCH_SCHEMA, screen_context, accepted_rows, total_cost
+from scale_release import NoveltyIndex, RESEARCH_SCHEMA, screen_context, accepted_rows, total_cost, release
 
 
 class ScaleTests(unittest.TestCase):
+    def test_release_replenishes_context_exclusions_before_packaging(self):
+        with patch('scale_release.generate') as generate, patch('scale_release.accepted_rows',return_value=[]), patch(
+                'scale_release.screen_context',side_effect=[[],[{},{}]]), patch('scale_release.package') as package:
+            release(Path('unused'),2)
+            self.assertEqual(generate.call_count,2)
+            package.assert_called_once_with(Path('unused'),2)
+
     def test_context_screen_hides_notes_and_preserves_original_audit_rows(self):
         rows=[{'seed_index':i,'screening_passed':True,'remaining_issues':[],
             'first_question':'هل كان أول رائد فضاء سعودي؟',

@@ -499,9 +499,18 @@ is asserted here; source materials retain their respective rights.
     print(json.dumps(metrics),flush=True)
 
 
+def release(directory,target=15000):
+    """Generate replacements if the final context screen excludes more chats."""
+    while True:
+        generate(directory,target)
+        if len(screen_context(directory,accepted_rows(directory))) >= target:
+            package(directory,target)
+            return
+
+
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action',choices=['prepare','screen','pilot','generate','package'])
+    parser.add_argument('action',choices=['prepare','screen','pilot','generate','package','release'])
     parser.add_argument('--directory',type=Path,default=ROOT/'output/salfah15k_v1')
     parser.add_argument('--target',type=int,default=15000)
     args=parser.parse_args()
@@ -512,6 +521,7 @@ def main():
     elif args.action=='screen':semantic_screen(args.directory)
     elif args.action=='pilot':generate(args.directory,500,pilot=True)
     elif args.action=='generate':generate(args.directory,args.target)
+    elif args.action=='release':release(args.directory,args.target)
     else:package(args.directory,args.target)
 
 
