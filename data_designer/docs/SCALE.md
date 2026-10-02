@@ -61,6 +61,8 @@ The final targeted context check reviewed 30 chats and excluded 13. There were
 15,272 passing chats available after this check; the release selects 15,000.
 Splits contain 13,493 train, 746 validation and 761 test chats, with no overlapping
 topic families. These are model-screened data, not comprehensive human approval.
+Published rows are shuffled independently within each split with seed 20261002;
+conversation contents and split membership are unchanged.
 
 The upload bundle is `output/salfah15k_v1/release/` on the VM. The full reader
 copy is `output/saudi_salfah_15k.passing.jsonl`, with its aggregate cost report.

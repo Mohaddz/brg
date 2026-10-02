@@ -7,6 +7,7 @@ from _paths import ROOT, CONFIGS
 import argparse
 import concurrent.futures
 import copy
+import hashlib
 import json
 import os
 import random
@@ -25,6 +26,7 @@ from lightweight import Requests, batch_checks, checks, run
 MODEL = 'openai/gpt-6-luna'
 PREP_BUDGET = 8
 TOTAL_BUDGET = 45
+ROW_SHUFFLE_SEED = 20261002
 NEW_DOMAINS = ['science', 'technology', 'games', 'cars', 'industry', 'cooking',
     'languages', 'chitchat', 'everyday_life', 'home', 'study_skills', 'work',
     'writing', 'programming', 'reasoning', 'creative', 'poetry_writing', 'arabic_grammar', 'tourism']
@@ -408,16 +410,26 @@ def package(directory,target=15000):
             'exchanges':row['exchange_count'],'grounding':row['grounding_mode'],
             'model_reviewed':row['selective_review'] is not None or str(row['seed_index']) in context_reviews,'synthetic':True})
     for split,items in splits.items():
+        random.Random(f'salfah:{ROW_SHUFFLE_SEED}:{split}').shuffle(items)
         (release/'data'/f'{split}.jsonl').write_text(''.join(json.dumps(r,ensure_ascii=False)+'\n' for r in items),encoding='utf-8')
     metrics={'conversations':target,'assistant_turns':sum(r['exchange_count'] for r in rows),
         'splits':{k:len(v) for k,v in splits.items()},'categories':dict(Counter(r['domain'] for r in rows)),
         'topics':len(groups),'provider_cost_usd':str(total_cost(directory)),
         'manual_corrections':0,'human_training_approved':False,
+        'row_order':'shuffled within each split','row_shuffle_seed':ROW_SHUFFLE_SEED,
         'context_shortlist_reviewed':len(context_reviews),
         'context_excluded':sum(not value['acceptable'] for value in context_reviews.values()),
         'model_reviewed':sum(r['selective_review'] is not None or str(r['seed_index']) in context_reviews for r in rows),
         'median_answer_words':statistics.median(len(m['content'].split()) for r in rows for m in r['conversation']['messages'][1::2])}
     atomic_json(release/'generation_report.json',metrics)
+    audit_path=release/'audit_report.json'
+    if audit_path.exists():
+        audit=json.loads(audit_path.read_text())
+        audit.update(row_order=metrics['row_order'],row_shuffle_seed=ROW_SHUFFLE_SEED,
+            release_files={str(f.relative_to(release)):{'bytes':f.stat().st_size,
+                'sha256':hashlib.sha256(f.read_bytes()).hexdigest()}
+                for f in (release/'data').glob('*.jsonl')})
+        atomic_json(audit_path,audit)
     progress_path=directory/'progress.json'
     progress=json.loads(progress_path.read_text()) if progress_path.exists() else {}
     progress.update(passing=passing_count,selected=target,release_prepared=True,
@@ -476,6 +488,8 @@ Each record contains `messages` with alternating user/assistant roles, plus topi
 category, exchange count, grounding route and a model-review indicator. Topic
 families stay together across train/validation/test to reduce leakage. Splits
 are approximately 90/5/5 by topic families, not exact row counts.
+Rows are shuffled within each split using a reproducible seed recorded in
+`generation_report.json`. Message order inside each conversation is preserved.
 
 ## Limitations
 
