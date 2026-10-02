@@ -50,21 +50,25 @@ class NoveltyIndex:
     """Exact and high-overlap lexical filtering; not an embedding-based guarantee."""
     def __init__(self):
         self.exact, self.words, self.postings = set(), [], defaultdict(set)
+        self.stopwords = set('كيف وش ليه ليش ما من في على عن أبي ابي عطني اعطني اكتب اشرح قارن الفرق بين هل مع بدون لي هذا هذي'.split())
 
     def accept(self, text):
         norm = normalized_question(text)
         words = set(norm.split())
         if not words or norm in self.exact:
             return False
-        candidates = set().union(*(self.postings[w] for w in words))
+        indexed = words - self.stopwords
+        candidates = set().union(*(self.postings[w] for w in indexed)) if indexed else set()
         for index in candidates:
             other = self.words[index]
+            if min(len(words), len(other)) / max(len(words), len(other)) < .8:
+                continue
             if len(words & other) / len(words | other) >= .8:
                 return False
         index = len(self.words)
         self.exact.add(norm)
         self.words.append(words)
-        for word in words:
+        for word in indexed:
             self.postings[word].add(index)
         return True
 

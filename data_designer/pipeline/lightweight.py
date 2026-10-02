@@ -82,7 +82,8 @@ QUALITY CONTRACT:
   When grounding_mode is general, answer stable ordinary knowledge carefully without
   invented citations, exact historical dates, named-poet quotations, current claims,
   medical/legal/financial recommendations or unverified person details.
-  Task examples may be hypothetical and explicitly framed as examples. Cite 1-2 relevant Markdown source links near factual
+  Task examples may be hypothetical and explicitly framed as examples. When sources
+  are supplied, cite 1-2 relevant Markdown source links near factual
   claims, using only supplied URLs. Stay in their scope; avoid invented dates,
   motives and achievements. General hypothetical illustrations are allowed when
   clearly framed as examples. Do not ask questions the evidence cannot answer.
@@ -453,7 +454,7 @@ class Requests:
             unresolved_request_count=len(self.unresolved()),
             unresolved_cost_upper_bound_usd=str(unknown), spend_upper_bound_usd=str(self.spent()),
             completed_conversations=completed, budget_usd=self.cfg["budget_usd"],
-            measurement_note="Sum of per-response provider usage.cost; includes sampled review, targeted repairs and rechecks. Reused research costs $0 in this run. Excludes Codex/session costs. Interrupted requests are listed separately with conservative token-cost bounds. Key delta is diagnostic only.")
+            measurement_note="Sum of per-response provider usage.cost, including preparation/research when those calls are present, generation, reviews, repairs and rechecks. Excludes VM and Codex/session costs. Interrupted requests retain conservative token-cost bounds. Key delta is diagnostic only.")
         try:
             after = self.api("auth/key")["data"]["usage"]
             result.update(key_usage_usd_after=after, observed_key_usage_delta_usd=str(Decimal(str(after))-Decimal(str(self.billing["key_usage_usd_before"]))))
