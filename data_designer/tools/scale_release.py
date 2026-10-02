@@ -237,8 +237,53 @@ def prepare(directory):
 
 
 def accepted_rows(directory):
-    return [json.loads(line) for p in sorted((directory/'batches').glob('batch_*.jsonl'))
+    rows = [json.loads(line) for p in sorted((directory/'batches').glob('batch_*.jsonl'))
         if '.passing.' not in p.name for line in p.read_text().splitlines() if line.strip()]
+    verdicts = directory/'context_verdicts.json'
+    if verdicts.exists():
+        results = json.loads(verdicts.read_text())
+        for row in rows:
+            result = results.get(str(row['seed_index']))
+            if result and not result['acceptable']:
+                row['screening_passed'] = False
+                row['remaining_issues'].append('Missing starter context: '+result['reason'])
+    return rows
+
+
+def context_candidate(question):
+    # High-recall shortlist, not a complete semantic-context guarantee.
+    return bool(re.match(r'^(?:هل كان|وش معناها|وش معنى هذا|هذا |اشرحها|اختبرني: هذا|قارن بينهم)', question))
+
+
+def screen_context(directory, rows):
+    """Screen dangling starter references without giving the judge hidden topic notes."""
+    path = directory/'context_verdicts.json'
+    results = json.loads(path.read_text()) if path.exists() else {}
+    candidates = [r for r in rows if r['screening_passed'] and
+        context_candidate(r['first_question']) and str(r['seed_index']) not in results]
+    if candidates:
+        remaining = Decimal(TOTAL_BUDGET)-total_cost(directory)
+        if remaining < Decimal('.1'):
+            raise RuntimeError('Insufficient budget for final context screening')
+        requests = Requests(directory/'context.work', {'model':MODEL, 'budget_usd':float(min(remaining,Decimal('1')))})
+        schema = {'type':'object','additionalProperties':False,'required':['acceptable','reason'],
+            'properties':{'acceptable':{'type':'boolean'},'reason':{'type':'string'}}}
+        def review(row):
+            value = requests.call('context-'+str(row['seed_index']),
+                'Judge only whether the first assistant reply assumes missing user context. '
+                'You see only what the user and assistant actually said. Reject guessing '
+                'an unnamed person, place, object, text or concept from hidden topic notes. '
+                'Accept a request that supplies its subject, a generic useful answer that '
+                'needs no missing details, or a reply that asks for the missing input and '
+                'clearly labels any illustrative example. Do not require biographies or '
+                'other unnecessary detail. Do not judge factual accuracy or formatting here.',
+                {'messages':row['conversation']['messages'][:2]}, schema, 1200)
+            return str(row['seed_index']),value
+        for key,value in parallel(candidates, review, workers=10):
+            results[key] = value
+            atomic_json(path, results)
+        requests.report(directory/'context.jsonl',len(results))
+    return [r for r in rows if r['screening_passed'] and results.get(str(r['seed_index']),{}).get('acceptable',True)]
 
 
 def semantic_screen(directory):
@@ -286,7 +331,7 @@ def semantic_screen(directory):
 
 
 def total_cost(directory):
-    files = [directory/'preparation.cost.json',directory/'semantic.cost.json',*(directory/'batches').glob('batch_*.cost.json')]
+    files = [directory/'preparation.cost.json',directory/'semantic.cost.json',directory/'context.cost.json',*(directory/'batches').glob('batch_*.cost.json')]
     return sum((Decimal(json.loads(p.read_text())['reported_cost_usd']) for p in files if p.exists()),Decimal(0))
 
 
@@ -342,10 +387,12 @@ def generate(directory,target,pilot=False):
 
 
 def package(directory,target=15000):
-    rows=[json.loads(line) for line in (directory/'salfah_reviewed.jsonl').read_text().splitlines()]
+    rows=screen_context(directory,accepted_rows(directory))
     if len(rows)<target:
         raise ValueError('Release target has not been achieved')
     rows=rows[:target]
+    (directory/'salfah_reviewed.jsonl').write_text(''.join(json.dumps(r,ensure_ascii=False)+'\n' for r in rows),encoding='utf-8')
+    context_reviews=json.loads((directory/'context_verdicts.json').read_text()) if (directory/'context_verdicts.json').exists() else {}
     assert len({normalized_question(r['first_question']) for r in rows})==target
     assert all(r['screening_passed'] and not r['remaining_issues'] for r in rows)
     assert not any(batch_checks(rows).values())
@@ -358,14 +405,16 @@ def package(directory,target=15000):
         splits[assignments[row['family_id']]].append({'id':f'salfah-{row["seed_index"]:06d}',
             'messages':row['conversation']['messages'],'topic':row['topic_id'],'category':row['domain'],
             'exchanges':row['exchange_count'],'grounding':row['grounding_mode'],
-            'model_reviewed':row['selective_review'] is not None,'synthetic':True})
+            'model_reviewed':row['selective_review'] is not None or str(row['seed_index']) in context_reviews,'synthetic':True})
     for split,items in splits.items():
         (release/'data'/f'{split}.jsonl').write_text(''.join(json.dumps(r,ensure_ascii=False)+'\n' for r in items),encoding='utf-8')
     metrics={'conversations':target,'assistant_turns':sum(r['exchange_count'] for r in rows),
         'splits':{k:len(v) for k,v in splits.items()},'categories':dict(Counter(r['domain'] for r in rows)),
         'topics':len(groups),'provider_cost_usd':str(total_cost(directory)),
         'manual_corrections':0,'human_training_approved':False,
-        'model_reviewed':sum(r['selective_review'] is not None for r in rows),
+        'context_shortlist_reviewed':len(context_reviews),
+        'context_excluded':sum(not value['acceptable'] for value in context_reviews.values()),
+        'model_reviewed':sum(r['selective_review'] is not None or str(r['seed_index']) in context_reviews for r in rows),
         'median_answer_words':statistics.median(len(m['content'].split()) for r in rows for m in r['conversation']['messages'][1::2])}
     atomic_json(release/'generation_report.json',metrics)
     card='''---
@@ -405,6 +454,9 @@ and flagged/repaired chats received same-model screening. Failed chats had at
 most two repair attempts; unresolved failures and detected clones were excluded.
 No manual content corrections were used. A code pass is not independent factual
 verification, and the dataset has not received comprehensive human review.
+Potentially dangling starter references receive a targeted first-reply check
+without hidden topic notes. Replies guessing missing subjects are excluded;
+this shortlist is not a comprehensive context audit.
 
 Saved checked reference notes support some factual topics. Selected precision
 topics use web-search excerpts screened by the model; these are not presented

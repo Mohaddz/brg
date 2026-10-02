@@ -14,10 +14,37 @@ from decimal import Decimal
 from unittest.mock import patch
 
 from lightweight import Requests
-from scale_release import NoveltyIndex, RESEARCH_SCHEMA
+from scale_release import NoveltyIndex, RESEARCH_SCHEMA, screen_context, accepted_rows, total_cost
 
 
 class ScaleTests(unittest.TestCase):
+    def test_context_screen_hides_notes_and_preserves_original_audit_rows(self):
+        rows=[{'seed_index':i,'screening_passed':True,'remaining_issues':[],
+            'first_question':'هل كان أول رائد فضاء سعودي؟',
+            'fact_pack':'hidden notes','conversation':{'messages':[
+                {'role':'user','content':'هل كان أول رائد فضاء سعودي؟'},
+                {'role':'assistant','content':'من تقصد؟' if i else 'إيه، سلطان.'}]}} for i in range(2)]
+        class FakeRequests:
+            def __init__(inner,*args):pass
+            def call(inner,name,system,data,*args):
+                self.assertEqual(set(data), {'messages'})
+                return {'acceptable':name.endswith('-1'),'reason':'missing person'}
+            def report(inner,*args):pass
+        with tempfile.TemporaryDirectory() as temp:
+            directory=Path(temp);(directory/'batches').mkdir()
+            audit=directory/'batches/batch_001.jsonl'
+            original=''.join(json.dumps(row)+'\n' for row in rows)
+            audit.write_text(original)
+            with patch('scale_release.Requests',FakeRequests):
+                result=screen_context(directory,rows)
+            self.assertEqual([r['seed_index'] for r in result],[1])
+            self.assertEqual(audit.read_text(),original)
+            loaded=accepted_rows(directory)
+            self.assertFalse(loaded[0]['screening_passed'])
+            self.assertTrue(loaded[1]['screening_passed'])
+            (directory/'context.cost.json').write_text(json.dumps({'reported_cost_usd':'.005'}))
+            self.assertEqual(total_cost(directory),Decimal('.005'))
+
     def test_paid_truncation_extension_is_bounded_and_both_calls_are_charged(self):
         def raw(finish, content, cost):
             return json.dumps({'choices':[{'finish_reason':finish,'message':{'content':content}}],

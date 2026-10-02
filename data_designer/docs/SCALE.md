@@ -34,6 +34,10 @@ There are no manual content correction stages.
 
 Useful formatting is assessed contextually in model reviews. Plain prose and
 drafts are allowed; Markdown absence alone never triggers a paid repair.
+Packaging also reviews a small shortlist of potentially dangling starter
+references without supplying hidden topic notes. Guessing missing subjects is
+excluded; asking for clarification is allowed. This is a targeted check, not
+a guarantee that every context problem is detected. Its calls and costs are saved.
 
 Preparation has an $8 provider-spend ceiling. The overall preparation/generation
 ceiling is $45, with at most $7 reserved per batch. In-flight calls reserve token
