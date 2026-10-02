@@ -49,6 +49,22 @@ hard cap. Costs sum actual per-response `usage.cost`; key usage is diagnostic.
 
 ## Artifacts and release
 
+The completed run selected 15,000 chats / 46,384 assistant replies from 15,500
+attempts. It covers 1,018 topic families and 28 categories. Median answer length
+is 46 words, maximum 302; 13,485 chats have multiple exchanges. Actual provider
+cost is $15.79876829 including preparation, intent screening, generation, repairs,
+reviews, excluded/extra examples and final context checks. There are no unresolved
+charges and no manual content corrections. Generation took 1h 27m 42s after the
+pilots; preparation and pilot time are additional.
+
+The final targeted context check reviewed 30 chats and excluded 13. There were
+15,272 passing chats available after this check; the release selects 15,000.
+Splits contain 13,493 train, 746 validation and 761 test chats, with no overlapping
+topic families. These are model-screened data, not comprehensive human approval.
+
+The upload bundle is `output/salfah15k_v1/release/` on the VM. The full reader
+copy is `output/saudi_salfah_15k.passing.jsonl`, with its aggregate cost report.
+
 - `topic_inventory.json`, `research_notes.json`, `seed_pool.json`
 - `preparation.work/`: cached responses and billing reservations
 - `batches/`: recipes, all rows, passing rows, summaries, costs and raw calls

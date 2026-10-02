@@ -23,6 +23,8 @@ answer ceiling and supports up to 100 workers. See [pipeline details](docs/LIGHT
 Completed pilots describe their original settings and remain historical.
 
 For the 500-chat pilot and 15k target, see the [scale workflow](docs/SCALE.md).
+The completed release has 15,000 chats and 46,384 assistant replies; its measured
+provider cost is $15.80 including preparation and automated review/repair.
 
 From `/root/brg`, inspect a recipe without paid calls:
 
@@ -51,7 +53,7 @@ in the same folder. The cleanup does not alter sources or generation policy.
 Reconnect the existing reader from Windows:
 
 ```powershell
-& data_designer/explorer/connect.ps1 -Dataset saudi_lightweight_parallel_100.passing.jsonl
+& data_designer/explorer/connect.ps1 -Dataset saudi_salfah_15k.passing.jsonl
 ```
 
 Retired generators, pilot correction scripts, old reader assets and obsolete
