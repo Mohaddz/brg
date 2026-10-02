@@ -44,6 +44,8 @@ RESEARCH_SCHEMA = {'type':'object','additionalProperties':False,'required':['fac
         'required':['text','url'],'properties':{'text':{'type':'string'},'url':{'type':'string'}}}}}}
 EVIDENCE_SCHEMA = {'type':'object','additionalProperties':False,'required':['supported','reason'],
     'properties':{'supported':{'type':'boolean'},'reason':{'type':'string'}}}
+NOVELTY_SCHEMA = {'type':'object','additionalProperties':False,'required':['keep','reason'],
+    'properties':{'keep':{'type':'array','items':{'type':'integer'}},'reason':{'type':'string'}}}
 
 
 class NoveltyIndex:
@@ -239,8 +241,52 @@ def accepted_rows(directory):
         if '.passing.' not in p.name for line in p.read_text().splitlines() if line.strip()]
 
 
+def semantic_screen(directory):
+    """Model review of intent overlap, in addition to lexical filtering."""
+    original = directory/'seed_pool.pre_semantic.json'
+    if not original.exists():
+        original.write_bytes((directory/'seed_pool.json').read_bytes())
+    rows = json.loads(original.read_text())
+    groups = defaultdict(list)
+    for row in rows:
+        groups[row['family_id']].append(row)
+    requests = Requests(directory/'semantic.work',{'model':MODEL,'budget_usd':3})
+    def review(item):
+        family, group = item
+        value = requests.call('novelty-'+family,
+            'Select materially distinct user requests within this topic. Compare MEANING, '
+            'not just words. Drop mere paraphrases of the same task/situation and changes '
+            'only to a name or number. Retain different misconceptions, operations, '
+            'constraints, audience needs, artifacts, contexts or contrasting cases. '
+            'Grammar examples with different grammatical conditions are distinct. '
+            'Do not impose an arbitrary quota: keep all genuinely different requests. '
+            'Return the input seed indices to keep and one concise reason.',
+            {'requests':[{'seed_index':r['seed_index'],'question':r['first_question'],
+                'intent':r['request_intent'],'scenario':r['scenario_guidance']} for r in group]},
+            NOVELTY_SCHEMA,1800)
+        keep=set(value['keep'])
+        if not keep <= {r['seed_index'] for r in group}:
+            raise ValueError('Novelty review returned an unknown seed')
+        return family, value
+    verdicts=dict(parallel(sorted(groups.items()),review,40))
+    keep={i for value in verdicts.values() for i in value['keep']}
+    selected=[r for r in rows if r['seed_index'] in keep]
+    for i,row in enumerate(selected):
+        row['authored_seed_index']=row['seed_index']
+        row['seed_index']=i
+    atomic_json(directory/'seed_pool.json',selected)
+    atomic_json(directory/'semantic_verdicts.json',verdicts)
+    cost=requests.report(directory/'semantic.jsonl',len(selected))
+    summary={'input_starters':len(rows),'retained_starters':len(selected),
+        'removed_semantic_repeats':len(rows)-len(selected),'families_reviewed':len(groups),
+        'provider_cost_usd':cost['reported_cost_usd'],'reviewer':MODEL,
+        'independent_or_human_review':False}
+    atomic_json(directory/'semantic.summary.json',summary)
+    print(json.dumps(summary),flush=True)
+
+
 def total_cost(directory):
-    files = [directory/'preparation.cost.json',*(directory/'batches').glob('batch_*.cost.json')]
+    files = [directory/'preparation.cost.json',directory/'semantic.cost.json',*(directory/'batches').glob('batch_*.cost.json')]
     return sum((Decimal(json.loads(p.read_text())['reported_cost_usd']) for p in files if p.exists()),Decimal(0))
 
 
@@ -397,7 +443,7 @@ is asserted here; source materials retain their respective rights.
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action',choices=['prepare','pilot','generate','package'])
+    parser.add_argument('action',choices=['prepare','screen','pilot','generate','package'])
     parser.add_argument('--directory',type=Path,default=ROOT/'output/salfah15k_v1')
     parser.add_argument('--target',type=int,default=15000)
     args=parser.parse_args()
@@ -405,6 +451,7 @@ def main():
     from brg.env import load_environment
     load_environment()
     if args.action=='prepare':prepare(args.directory)
+    elif args.action=='screen':semantic_screen(args.directory)
     elif args.action=='pilot':generate(args.directory,500,pilot=True)
     elif args.action=='generate':generate(args.directory,args.target)
     else:package(args.directory,args.target)
