@@ -139,7 +139,14 @@ def prepare(directory):
                 if any(host==domain or host.endswith('.'+domain) for domain in topic['allowed_domains']):
                     citations.append(cite)
         permitted = {c['url'] for c in citations if c.get('content')}
-        facts = [f for f in value['facts'] if f['url'] in permitted]
+        if 'facts' not in value and permitted:
+            value = requests.call('extract-'+topic['topic_id'],
+                'Extract short factual paraphrases supported DIRECTLY by the retrieved excerpts. '
+                'Use only supplied URLs. Do not fill gaps from memory or reproduce poems. '
+                'The research summary can be wrong; the source excerpts are the evidence. '
+                'Return an empty list if nothing relevant is supported.',
+                {'subject':topic['subject'],'excerpts':citations}, RESEARCH_SCHEMA, 2200)
+        facts = [f for f in value.get('facts',[]) if f['url'] in permitted]
         if not facts:
             return topic['topic_id'], None
         verdict = requests.call('evidence-'+topic['topic_id'],

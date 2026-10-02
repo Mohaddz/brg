@@ -435,7 +435,13 @@ class Requests:
                 pending.unlink()
         if raw.get("error") or raw["choices"][0].get("finish_reason") != "stop":
             raise ValueError("Incomplete completion retained for diagnosis")
-        return json.loads(raw["choices"][0]["message"]["content"])
+        content = raw["choices"][0]["message"].get("content") or ""
+        try:
+            return json.loads(content)
+        except json.JSONDecodeError:
+            if extra_tools:
+                return {"research_text": content}
+            raise
 
     def report(self, output, completed):
         stages = {}
