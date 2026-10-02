@@ -53,6 +53,31 @@ class ServerTest(unittest.TestCase):
             self.assertEqual(result.exception.code, 404)
             result.exception.close()
 
+    def test_reply_sort_is_global_stable_and_uses_largest_individual_reply(self):
+        records = []
+        for index in range(103):
+            sizes = [60, 60] if index == 0 else [100] if index in (1, 102) else [10]
+            turns = []
+            for size in sizes:
+                turns.extend([{'role':'user','content':'question'},
+                    {'role':'assistant','content':' '.join(['word']*size)}])
+            records.append({'domain':'writing','screening_passed':index != 102,
+                'conversation':{'messages':turns}})
+        (self.data/'pilot.jsonl').write_text(''.join(json.dumps(r)+'\n' for r in records))
+        descending = self.get('/api/datasets/pilot.jsonl?sort=reply_desc')
+        self.assertEqual([r['id'] for r in descending['rows'][:3]], [1,102,0])
+        self.assertEqual(descending['rows'][2]['words'],120)
+        self.assertEqual(descending['rows'][2]['max_reply_words'],60)
+        ascending_last = self.get('/api/datasets/pilot.jsonl?sort=reply_asc&page=1')
+        self.assertEqual([r['id'] for r in ascending_last['rows']],[0,1,102])
+        self.assertEqual(self.get('/api/datasets/pilot.jsonl?sort=reply_desc&status=flagged')['rows'][0]['id'],102)
+        self.assertEqual(self.get('/api/datasets/pilot.jsonl')['rows'][0]['id'],0)
+        self.assertEqual(self.get('/api/datasets/pilot.jsonl/records/102'),records[102])
+        with self.assertRaises(HTTPError) as result:
+            self.get('/api/datasets/pilot.jsonl?sort=unknown')
+        self.assertEqual(result.exception.code,400)
+        result.exception.close()
+
     def test_index_refreshes_after_file_change(self):
         self.assertEqual(self.datasets.index("pilot.jsonl")["count"], 2)
         with (self.data / "pilot.jsonl").open("a", encoding="utf-8") as output:

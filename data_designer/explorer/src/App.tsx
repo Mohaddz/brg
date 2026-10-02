@@ -108,6 +108,10 @@ export default function App() {
   const deferredSearch = useDeferredValue(search)
   const [status, setStatus] = useState("all")
   const [domain, setDomain] = useState("all")
+  const [sort, setSort] = useState(() => {
+    const value = new URLSearchParams(location.search).get("sort")
+    return value === "dataset" || value === "reply_asc" ? value : "reply_desc"
+  })
   const [page, setPage] = useState(0)
   const [tab, setTab] = useState("conversation")
   const [libraryOpen, setLibraryOpen] = useState(
@@ -134,7 +138,7 @@ export default function App() {
     ""
   const batchResult = useResource<Batch>(
     dataset
-      ? `/api/datasets/${encodeURIComponent(dataset)}?${new URLSearchParams({ search: deferredSearch, status, domain, page: String(page) })}`
+      ? `/api/datasets/${encodeURIComponent(dataset)}?${new URLSearchParams({ search: deferredSearch, status, domain, sort, page: String(page) })}`
       : null,
     refresh
   )
@@ -188,9 +192,9 @@ export default function App() {
       history.replaceState(
         null,
         "",
-        `?${new URLSearchParams({ dataset, row: String(selectedRow.id + 1) })}`
+        `?${new URLSearchParams({ dataset, row: String(selectedRow.id + 1), sort })}`
       )
-  }, [dataset, selectedRow])
+  }, [dataset, selectedRow, sort])
   function chooseRow(id: number) {
     setSelected(id)
     setReviewScope(undefined)
@@ -473,6 +477,40 @@ export default function App() {
                       </SelectContent>
                     </Select>
                   </Field>
+                  <Field>
+                    <FieldLabel htmlFor="reply-size-sort">
+                      Reply size
+                    </FieldLabel>
+                    <Select
+                      value={sort}
+                      onValueChange={(v) => {
+                        setSort(v)
+                        setPage(0)
+                        setSelected(-1)
+                      }}
+                    >
+                      <SelectTrigger
+                        id="reply-size-sort"
+                        aria-label="Reply size order"
+                      >
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          <SelectItem value="reply_desc">
+                            Longest replies first
+                          </SelectItem>
+                          <SelectItem value="reply_asc">
+                            Shortest replies first
+                          </SelectItem>
+                          <SelectItem value="dataset">Dataset order</SelectItem>
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-xs text-muted-foreground">
+                      By the largest assistant reply in each chat.
+                    </p>
+                  </Field>
                 </FieldGroup>
               </div>
               <Separator />
@@ -533,7 +571,9 @@ export default function App() {
                           {row.exchanges}{" "}
                           {row.exchanges === 1 ? "exchange" : "exchanges"}
                         </span>
-                        <span>{row.words} words</span>
+                        <span>
+                          {row.max_reply_words ?? row.words} words max reply
+                        </span>
                       </div>
                     </button>
                   ))

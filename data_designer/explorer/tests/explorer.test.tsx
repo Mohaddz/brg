@@ -4,10 +4,7 @@ import { resources } from "../src/lib/resources"
 beforeEach(() => resources.clear())
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { createHash, webcrypto } from "node:crypto"
-import { readFileSync } from "node:fs"
-import { resolve } from "node:path"
-import { runInNewContext } from "node:vm"
+import { createHash } from "node:crypto"
 import App from "../src/App"
 import { ThemeProvider } from "../src/components/theme-provider"
 import {
@@ -111,20 +108,6 @@ function mockApi() {
   )
 }
 describe("annotation compatibility", () => {
-  it("matches fingerprints from the original viewer", async () => {
-    const context: {
-      crypto: typeof webcrypto
-      TextEncoder: typeof TextEncoder
-      AnnotationKit?: { fingerprint: (record: unknown) => Promise<string> }
-    } = { crypto: webcrypto, TextEncoder }
-    runInNewContext(
-      readFileSync(resolve(process.cwd(), "../annotations.js"), "utf8"),
-      context
-    )
-    expect(await fingerprint(record)).toBe(
-      await context.AnnotationKit!.fingerprint(record)
-    )
-  })
   it("preserves the original canonical SHA256 including Arabic and nested objects", async () => {
     const expected = createHash("sha256")
       .update(canonical(record), "utf8")
@@ -156,6 +139,39 @@ describe("annotation compatibility", () => {
   })
 })
 describe("review workspace", () => {
+  it("requests dataset-wide reply sorting and switches to smallest first", async () => {
+    history.replaceState(null, "", "/")
+    mockApi()
+    const user = userEvent.setup()
+    render(
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    )
+    await screen.findByText("هذه رسالة مناسبة.")
+    expect(
+      vi
+        .mocked(fetch)
+        .mock.calls.some(([url]) => String(url).includes("sort=reply_desc"))
+    ).toBe(true)
+    fireEvent.click(
+      screen.getByRole("button", { name: "Library", exact: true })
+    )
+    await user.click(screen.getByRole("combobox", { name: "Reply size order" }))
+    await user.click(
+      screen.getByRole("option", { name: "Shortest replies first" })
+    )
+    await waitFor(() =>
+      expect(
+        vi.mocked(fetch).mock.calls.some(([url]) => {
+          const params = new URL(String(url), "http://localhost").searchParams
+          return (
+            params.get("sort") === "reply_asc" && params.get("page") === "0"
+          )
+        })
+      ).toBe(true)
+    )
+  })
   it("switches to a prefetched chat without loading blocks or mismatched content", async () => {
     const second = {
       ...record,

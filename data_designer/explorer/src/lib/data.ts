@@ -55,6 +55,7 @@ export type Row = {
   passed: boolean | null
   exchanges: number
   words: number
+  max_reply_words?: number
   seed_index?: number
 }
 export type Batch = {

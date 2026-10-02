@@ -82,6 +82,7 @@ class Datasets:
                             "scenario": record.get("scenario", ""), "domain": domain,
                             "profile": record.get("profile", ""), "passed": record.get("screening_passed"),
                             "exchanges": len(lengths), "words": sum(lengths),
+                            "max_reply_words": max(lengths, default=0),
                             "seed_index": record.get("seed_index")})
                     except (ValueError, TypeError, KeyError, AttributeError):
                         malformed += 1
@@ -146,11 +147,18 @@ def handler(datasets, dist):
                     search = query.get("search", [""])[0].casefold()
                     domain = query.get("domain", ["all"])[0]
                     status = query.get("status", ["all"])[0]
+                    order = query.get("sort", ["dataset"])[0]
+                    if order not in {"dataset", "reply_desc", "reply_asc"}:
+                        raise ValueError("Invalid sort order")
                     rows = [r for r in info["rows"] if
                         (not search or search in (r["request"] + " " + r["scenario"] + " " + r["domain"]).casefold())
                         and (domain == "all" or r["domain"] == domain)
                         and (status == "all" or status == "pass" and r["passed"] is True
                              or status == "flagged" and r["passed"] is False)]
+                    if order != "dataset":
+                        rows.sort(key=lambda r: (
+                            -r["max_reply_words"] if order == "reply_desc" else r["max_reply_words"],
+                            r["id"]))
                     page = max(0, int(query.get("page", ["0"])[0]))
                     size = 100
                     return self.send({**{k: v for k, v in info.items() if k != "rows"}, "filtered": len(rows),
