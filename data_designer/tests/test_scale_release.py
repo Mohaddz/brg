@@ -18,6 +18,29 @@ from scale_release import NoveltyIndex, RESEARCH_SCHEMA
 
 
 class ScaleTests(unittest.TestCase):
+    def test_paid_truncation_extension_is_bounded_and_both_calls_are_charged(self):
+        def raw(finish, content, cost):
+            return json.dumps({'choices':[{'finish_reason':finish,'message':{'content':content}}],
+                'usage':{'cost':cost}}).encode()
+        responses = [raw('length', '', .001), raw('stop', '{"facts":[]}', .002)]
+        with tempfile.TemporaryDirectory() as directory:
+            ledger = Requests.__new__(Requests)
+            ledger.lock = threading.RLock()
+            ledger.directory = Path(directory)
+            ledger.cfg = {'model':'test','budget_usd':1}
+            ledger.billing = {'pricing_usd_per_token':{'prompt':'0','completion':'0'}}
+            def response(*args, **kwargs):
+                value = io.BytesIO(responses.pop(0))
+                value.headers = {}
+                return value
+            with patch.dict(os.environ, {'OPENROUTER_API_KEY':'offline'}), patch(
+                    'lightweight.urllib.request.urlopen',side_effect=response) as network:
+                value = ledger.call('novelty-one','system',{},RESEARCH_SCHEMA,100)
+                self.assertEqual(value, {'facts':[]})
+                self.assertEqual(network.call_count, 2)
+            self.assertEqual(ledger.spent(), Decimal('.003'))
+            self.assertEqual(len(list(Path(directory).glob('request-*.json'))), 2)
+
     def test_novelty_rejects_duplicates_and_keeps_different_tasks(self):
         index = NoveltyIndex()
         self.assertTrue(index.accept('اكتب رسالة شكر للمعلم'))

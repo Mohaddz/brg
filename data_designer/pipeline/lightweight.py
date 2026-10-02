@@ -504,8 +504,14 @@ def generate_conversations(seeds, requests, workers, on_complete=None):
     """Parallel independent chats; keep outputs ordered and cancel queued failures."""
     def generate_one(seed):
         row = copy.deepcopy(seed)
-        row["conversation"] = requests.call(f"generate-{row['seed_index']}", WRITER, context(row),
-            conversation_schema(row["max_exchanges"]), row["max_exchanges"] * TOKENS_PER_EXCHANGE + 1200)
+        try:
+            row["conversation"] = requests.call(f"generate-{row['seed_index']}", WRITER, context(row),
+                conversation_schema(row["max_exchanges"]), row["max_exchanges"] * TOKENS_PER_EXCHANGE + 1200)
+        except ValueError as error:
+            if not isinstance(error, json.JSONDecodeError) and str(error) != "Incomplete completion retained for diagnosis":
+                raise
+            row["conversation"] = {"messages": []}
+            row["generation_failure"] = str(error)
         return row
 
     generated = []
@@ -542,7 +548,7 @@ def screen_conversation(seed, requests, library, sampled, cross_issues, cfg):
             issues += review["issues"] or [review["reason"]]
     repairs = 0
     repair_history = []
-    while issues and repairs < cfg["repair_attempts"]:
+    while issues and repairs < cfg["repair_attempts"] and not row.get("generation_failure"):
         repairs += 1
         allowed_users = repairable_user_positions(messages, issues)
         repair_prompt = WRITER + "\nRepair only the supplied defects using the whole conversation and checked facts. Return the complete messages array. Keep the starter EXACT. Keep all other user messages EXACT except the explicitly allowed user message numbers, which may be fixed only to resolve the supplied defect. Preserve good answers and exchange count. Check calculations and continuity across all turns."
