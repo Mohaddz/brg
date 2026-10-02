@@ -1,0 +1,217 @@
+version: saudi-hybrid-v1
+seed: 9302026
+count: 50
+references: ../../references/hybrid_references.json
+sources: ../../references/hybrid_sources.json
+models:
+  writer: openai/gpt-6-luna
+  enhancer: openai/gpt-6-luna
+  judge: openai/gpt-6-luna
+runtime:
+  host: root@135.181.63.163
+  repo: /root/brg
+  output: data_designer/output/saudi_hybrid_pilot_v1.jsonl
+  max_parallel_requests: 4
+  batch_size: 10
+  max_exchanges: 3
+  max_tokens: 3000
+  budget_usd: 2.00
+  # Conservative stage reserve, checked before new requests. Key-level usage
+  # and provider retry/billing delay mean this is a spending stop, not a hard cap.
+  reserve_per_request_usd: 0.005
+  timeout_seconds: 180
+user_styles:
+  - Brief and direct; short wording can still ask a substantial question
+  - Casual with ordinary fragments; no contrived unfinished sentence
+  - Explain a difficulty in your own words; don't write a polished assignment
+  - Give a useful draft or relevant constraints when the task needs them
+  - Knowledgeable but conversational; use technical terms only when useful
+openings:
+  direct: 8
+  brief_greeting: 1
+  gradual: 1
+depths:
+  simple: A brief greeting, clarification, or narrow answer; do not inflate it
+  developed: A complete answer with useful reasoning, a concrete example or actionable steps
+  substantial: A complete artifact or multi-part explanation, including important trade-offs; no padding
+domains:
+  writing:
+    weight: 6
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      editing:
+        request_type: editing
+        cues:
+          - Improve a supplied community announcement while preserving who it is for and when it happens
+          - Turn a rough project explanation into a clear paragraph for a nontechnical reader
+          - Rewrite a clumsy apology so it accepts responsibility without sounding theatrical
+      creative_fiction:
+        request_type: drafting
+        cues:
+          - Write a scene where two siblings avoid saying what is really bothering them
+          - Help build an opening for a story about a misdelivered parcel without overexplaining the mystery
+          - Revise dialogue between teammates so different personalities come through without exaggerated slang
+  career:
+    weight: 6
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      interviews:
+        request_type: coaching
+        cues:
+          - Help explain a failed project in an interview without inventing successes
+          - Practice answering a question about changing careers using the user's supplied experience
+          - Turn a rambling account of handling a disagreement into a concrete interview answer
+      workplace_writing:
+        request_type: drafting
+        cues:
+          - Write a handover note that distinguishes finished work, blockers and next actions
+          - Ask a teammate for a missing dependency without sounding accusatory
+          - Draft a request to reprioritize conflicting tasks using the user's actual deadlines
+  everyday:
+    weight: 6
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      planning:
+        request_type: planning
+        cues:
+          - Plan preparing a room for visitors with limited time and a realistic priority order
+          - Divide shared errands fairly around each person's supplied availability
+          - Make a manageable plan for sorting paperwork without assumptions about legal retention rules
+      decisions:
+        request_type: comparison
+        cues:
+          - Compare two user-supplied class schedules with different travel and study time
+          - Choose between repairing an item and replacing it using only costs supplied by the user
+          - Help decide which of several hobby projects to finish with a limited weekend
+  social:
+    weight: 4
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      communication:
+        request_type: drafting
+        cues:
+          - Write a clear group-chat reminder that doesn't assume people deliberately ignored it
+          - Explain a boundary to a friend while preserving warmth and avoiding invented backstory
+      content:
+        request_type: planning
+        cues:
+          - Develop an educational post from user-supplied material without promising engagement
+          - Suggest a simple structure for a short video explaining a hobby; no platform algorithm claims
+  culture:
+    weight: 4
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      language:
+        request_type: editing
+        cues:
+          - Explain why a supplied message sounds stiff and offer natural Saudi alternatives without invented word origins
+          - Help translate a phrase into conversational Saudi while preserving its intended politeness
+      gatherings:
+        request_type: planning
+        cues:
+          - Draft an invitation for a small family gathering using only supplied arrangements
+          - Help word a welcome message for new members of a reading group without cultural stereotypes
+  sports:
+    weight: 4
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      team_organization:
+        request_type: planning
+        cues:
+          - Organize a casual match based on supplied player counts and available time; no invented sport rules
+          - Write a message about rotating participation fairly when more friends arrive than places available
+      hobby_goals:
+        request_type: coaching
+        cues:
+          - Make a simple attendance habit for a hobby sports group without exercise prescriptions
+          - Help a team review its own supplied notes after a game without inventing events or scores
+  science:
+    weight: 5
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      astronomy:
+        request_type: explanation
+        source_ids: [nasa-light-year]
+        cues:
+          - Explain why seeing a distant star means receiving old light, using a hypothetical distance
+          - Explain how a light-year can be a distance even though its name contains year
+          - Compare eight light-minutes and several light-years without implying instantaneous travel
+          - Help a beginner reason about when light from a hypothetical change would arrive
+          - Explain why a very fast signal can still take years to cross a large distance
+  technology:
+    weight: 5
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      web_requests:
+        request_type: troubleshooting
+        source_ids: [mdn-cors]
+        cues:
+          - Explain why a browser request can have a CORS failure; ask for the actual error before diagnosing
+          - Compare a preflight request and the actual application request
+          - Explain what a cross-origin request is using hypothetical local development URLs
+          - Explain why successful server processing doesn't establish that browser JavaScript can read the response
+          - Help identify what to inspect when a browser reports a CORS error without inventing headers already present
+  code:
+    weight: 5
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      python_data_structures:
+        request_type: coding
+        source_ids: [python-data-structures]
+        cues:
+          - Compare a list, set and dictionary for tracking unique labels and associated counts
+          - Remove duplicates from supplied strings while explaining when ordering matters
+          - Explain an overwritten dictionary value with a small supplied example
+          - Help handle a missing dictionary key without assuming it means a malformed file
+          - Explain why using a set for display order can produce a surprising result
+  math:
+    weight: 5
+    profile: deep
+    grounding_mode: task
+    subdomains:
+      reasoning:
+        request_type: explanation
+        cues:
+          - Explain successive percentage changes using small hypothetical numbers and checked arithmetic
+          - Explain why an average can change when group sizes differ using a worked example
+          - Help compare two hypothetical pricing plans with a break-even calculation
+          - Explain the difference between adding a fixed amount and multiplying by a percentage
+          - Turn a word problem about shared costs into an equation and check the result
+  history:
+    weight: 0
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      ancient_history: {request_type: explanation, source_ids: [], cues: []}
+      medieval_history: {request_type: comparison, source_ids: [], cues: []}
+      early_modern: {request_type: explanation, source_ids: [], cues: []}
+  medical:
+    weight: 0
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      general_health: {request_type: explanation, source_ids: [], cues: []}
+      mental_health: {request_type: explanation, source_ids: [], cues: []}
+  legal:
+    weight: 0
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      legal_concepts: {request_type: explanation, source_ids: [], cues: []}
+  news:
+    weight: 0
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      politics: {request_type: explanation, source_ids: [], cues: []}
+      business: {request_type: explanation, source_ids: [], cues: []}
+      science_news: {request_type: explanation, source_ids: [], cues: []}

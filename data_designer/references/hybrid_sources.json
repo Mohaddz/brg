@@ -1,0 +1,44 @@
+[
+  {
+    "source_id": "nasa-light-year",
+    "publisher": "NASA Science",
+    "url": "https://science.nasa.gov/exoplanets/what-is-a-light-year/",
+    "checked_on": "2026-09-30",
+    "review_status": "source_checked",
+    "license_note": "Short paraphrased source notes, not a copy of the article. Source reference is retained for review.",
+    "facts": [
+      {"fact_id": "light-year-distance", "text": "A light-year measures the distance light travels in one year, approximately 9.46 trillion kilometres."},
+      {"fact_id": "finite-light-speed", "text": "Light travels through space at approximately 300,000 kilometres per second. Large distances therefore still take time to cross."},
+      {"fact_id": "sun-delay", "text": "Earth is approximately eight light-minutes from the Sun."},
+      {"fact_id": "light-delay-example", "text": "From these definitions, light from a hypothetical object five light-years away takes five years to arrive. This is a worked implication of the distance definition, not a claim about a named object."}
+    ]
+  },
+  {
+    "source_id": "python-data-structures",
+    "publisher": "Python documentation",
+    "url": "https://docs.python.org/3/tutorial/datastructures.html",
+    "checked_on": "2026-09-30",
+    "review_status": "source_checked",
+    "license_note": "Short paraphrased documentation notes. Examples generated for the pilot should be original and manually checked.",
+    "facts": [
+      {"fact_id": "python-sets", "text": "A set is an unordered collection without duplicate elements; it supports membership tests and operations such as intersection and union. Do not promise a set's iteration order."},
+      {"fact_id": "python-dicts", "text": "A dictionary maps unique keys to values. Assigning a value to an existing key replaces that key's previous value. Dictionary iteration preserves insertion order."},
+      {"fact_id": "python-missing-key", "text": "Accessing an absent dictionary key with subscripting raises KeyError. dict.get can instead return None or an explicitly supplied default."},
+      {"fact_id": "python-lists", "text": "Lists are ordered sequences and may contain repeated elements. Code may use an explicit loop, membership test and append to keep first occurrences in their original order."}
+    ]
+  },
+  {
+    "source_id": "mdn-cors",
+    "publisher": "MDN Web Docs",
+    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS",
+    "checked_on": "2026-09-30",
+    "review_status": "source_checked",
+    "license_note": "Short paraphrased documentation notes, not article text.",
+    "facts": [
+      {"fact_id": "cors-headers", "text": "CORS uses HTTP response headers to tell browsers which other origins may read a response. Origin includes scheme, host and port."},
+      {"fact_id": "cors-preflight", "text": "Some cross-origin browser requests first send an OPTIONS preflight describing the planned method and headers. A preflight checks permission; it is not the actual application request. Not every cross-origin request needs a preflight."},
+      {"fact_id": "cors-browser", "text": "Browser fetch and XMLHttpRequest enforce the same-origin policy unless the response has appropriate CORS headers. CORS concerns browser access to responses, not a general guarantee that the server did or did not process a request."},
+      {"fact_id": "cors-debug", "text": "JavaScript receives limited details of a CORS failure; the browser console provides more information. Diagnosing a specific request requires its actual error and request/response details."}
+    ]
+  }
+]

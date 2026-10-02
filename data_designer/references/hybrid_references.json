@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "purpose": "Style guidance for NEW conversations; not SFT data or factual evidence",
+  "saas_sha256": "3837e26c4d732fd1d5aeb3373e99de8c5b26ba95050ff4d03a6904ddc36a30bd",
+  "local_sha256": "f0e769f63bf7befdf1bbe39a09a53f1118a789be9802b94e4df89d3411b57ed3",
+  "selection_sha256": "e782e11d47e68d9bd4c7bc8ba1d4315b3bb97e72a7a8abc5f1751cdea135cef7",
+  "references": [
+    {
+      "id": "saas-fiction",
+      "origin": "saas",
+      "index": 3,
+      "domain": "writing",
+      "request_type": "drafting",
+      "demonstrates": [
+        "complete_output",
+        "respect_character_constraints",
+        "meaningful_revision"
+      ],
+      "review_status": "agent_style_reviewed",
+      "review_note": "Keep a complete scene and brief rationale; remove praise, universal psychological claims and repeated offers.",
+      "source_row_sha256": "b69326c4e73b788612a1634eee4bcc8a88425e4329e85f16fcba1905b8787730",
+      "role": "style_only_not_factual_evidence",
+      "user": "لا، الأب ما يصارخ. يضغط بهدوء ويخلّي ولده يحس بالذنب، والولد مؤدب بس واصل حده. أعد المشهد على هالأساس.",
+      "assistant": "نخلي الضغط يطلع من اختيار الكلام والسكوت، بدون صراخ:\n\nالأب يحط فنجاله على الطاولة ويطالع ولده.\n\n**الأب:** عموماً أنت كبير وتعرف مصلحتك. بس بعد كل هالسنين، توك تكتشف إن الطب ما يناسبك؟\n**الولد:** يبه، أنا ما غيرت رأيي فجأة. من زمان وأنا أحاول أكمل، بس ما أبي أوعدك بشي وأنا عارف إني ما أقدر.\n**الأب:** وأنا وش أقول للي يسألوني عنك؟ كل مرة أقول لهم ولدي يدرس طب وأنا مبسوط فيه.\n**الولد:** قل لهم إني غيرت تخصصي. بس لا يصير رضاك عني مربوط باسم التخصص.\n\nيسكت الأب ويحرّك فنجاله، والولد ينتظر جواب ما يجي.\n\nخليت الأب يستخدم توقعات الناس بدل التهديد المباشر، والولد يرد على أصل الضغط مع بقاء احترامه. والسكوت في النهاية يترك التوتر قائم بدل ما يحسم الخلاف بجملة جاهزة.",
+      "earlier_user_messages": [
+        "هلا، عندي مشهد في مسلسل سعودي درامي، والمشكلة إني أحس الحوار طالع 'كتابي' بزيادة وما يشبه كلامنا في الواقع. المشهد عبارة عن مواجهة بين أب وابنه في المجلس، والابن يبي يقنعه يغير تخصصه الجامعي من طب إلى فنون بصرية، والأب رافض تماماً.\n\nالحوار الحالي:\nالأب: يا بني، إن الطب مهنة سامية ومستقبلك فيها مضمون، لماذا ترغب في تركها؟\nالابن: يا والدي، أنا لا أجد نفسي في الكتب العلمية، بل أجد شغفي في الرسم والألوان.\nالأب: هذا كلام عاطفي لا يبني مستقبلاً، عليك الالتزام بما اتفقنا عليه.\n\nممكن تساعدني أحول هذا الحوار ليكون بلهجة سعودية بيضاء، طبيعية، وتعكس التوتر والصدام العاطفي بين جيلين؟ أبي كلام يحسسني إنهم فعلاً جالسين في مجلس سعودي، مو في رواية."
+      ],
+      "edited": true,
+      "training_approved": false
+    },
+    {
+      "id": "saas-story-edit",
+      "origin": "saas",
+      "index": 11,
+      "domain": "writing",
+      "request_type": "editing",
+      "demonstrates": [
+        "usable_revision",
+        "casual_dialect",
+        "preserve_details"
+      ],
+      "review_status": "agent_style_reviewed",
+      "review_note": "Repair awkward wording, remove automatic agreement and trailing question.",
+      "source_row_sha256": "44013a3937d56d4d92d448c8237b9e66bf9a96193ff5cc8b6bb1ef97c0045fff",
+      "role": "style_only_not_factual_evidence",
+      "user": "والله البداية بطلة، بس أحس كلمة 'يئن' و'متهالكة' لسه فيها ريحة فصحى. أبيها تكون طبيعية أكثر، كأن واحد يسولف لي القصة. وأبي أضيف تفصيل إن خالد لقى مذكرات صغيرة مغطاة بجلد أسود قديم على طاولة خشبية مكسورة. كيف ممكن ندمجها في النص بحيث ما يكون الوصف ممل؟",
+      "assistant": "نقدر ندخل المذكرات من خلال حركة خالد، بدل ما نوقف القصة عشان نوصف كل شي:\n\n«دفع خالد الباب، وطلع منه صرير خلّاه يوقف لحظة. أول ما دخل، جته ريحة الورق والغبار. الرفوف من الأرض للسقف، وبينها ممر بالكاد يكفيه. مد يده يبعد كتاب طالع من مكانه، ولمح وراه طاولة خشب رجلها مكسورة. كان عليها دفتر صغير، غلافه جلد أسود متشقق. مسح الغبار عنه بطرف كمه وفتحه. في أول صفحة، عرف خط جده.»\n\nكذا خفّ الوصف الثقيل، وبقي إحساس ضيق المكان وقِدم الكتب. والمذكرات صارت جزء من حدث يحرّك المشهد، مع نهاية تعطي القارئ سبب يكمل.",
+      "earlier_user_messages": [
+        "هلا، عندي فكرة قصة قصيرة عن واحد يكتشف إن جده كان يملك مكتبة سرية في وسط الرياض القديمة، بس أبي المساعدة في صياغة المشهد الأول. أبي القارئ يحس بريحة الكتب القديمة والغبار والضيق اللي في المكان، وبنفس الوقت يكون الأسلوب سعودي عفوي مو لغة عربية فصحى جامدة. تقدر تعطيني مقترح لبداية المشهد؟"
+      ],
+      "edited": true,
+      "training_approved": false
+    },
+    {
+      "id": "saas-evidence",
+      "origin": "saas",
+      "index": 23,
+      "domain": "history",
+      "request_type": "explanation",
+      "demonstrates": [
+        "explain_method",
+        "concrete_example",
+        "appropriate_uncertainty"
+      ],
+      "review_status": "agent_style_reviewed",
+      "review_note": "Replace sweeping historical assertions with a hypothetical source-comparison method.",
+      "source_row_sha256": "ea0fea47f2826f0ddd08ea5cfe562ff4b846ef5f183d57a7bcb5affcb757924c",
+      "role": "style_only_not_factual_evidence",
+      "user": "إذا كل مؤرخ له زاوية، كيف أعرف الرواية الأقرب للواقع؟ ولا يعني كلها نفس الشي؟",
+      "assistant": "اختلاف الزوايا ما يعني إن كل الروايات متساوية. تقدر تقارن قوة الدليل بدل ما تختار الكاتب اللي ترتاح له.\n\nابدأ بثلاث أسئلة: متى كُتب المصدر؟ هل صاحبه شاهد الحدث أو ينقل عن غيره؟ وعلى وش يستند كلامه؟ بعدها قارن التفاصيل بمصادر مستقلة؛ تكرار القصة في كتب تنقل عن نفس المصدر ما يعطيك شهادات مستقلة.\n\nمثلاً، لو روايتان تختلفان على موعد حدث، ابحث عن وثيقة مؤرخة مرتبطة فيه، ثم شوف هل التاريخ فعلاً يحسم الخلاف أو بس يضيّق الاحتمالات. هذا مثال لطريقة الفحص، مو حكم على واقعة معينة.\n\nوفي النتيجة فرّق بين اللي تدعمه الأدلة، واللي هو تفسير محتمل، واللي ما نقدر نحسمه بالمصادر الموجودة. تقدر ترجّح رواية وتظل واضح بشأن حدود الثقة فيها.",
+      "earlier_user_messages": [
+        "يا هلا، كنت أقرأ عن تاريخ الجزيرة العربية ولاحظت إن فيه فرق كبير بين كيف يكتبون المؤرخين الغربيين عن الدولة السعودية الأولى وبين اللي يكتبونه مؤرخينا. هل تعتقد إن هذا مجرد اختلاف في المصادر ولا السالفة فيها انحيازات أيديولوجية؟"
+      ],
+      "edited": true,
+      "training_approved": false
+    },
+    {
+      "id": "saas-rag-depth",
+      "origin": "saas",
+      "index": 35,
+      "domain": "technology",
+      "request_type": "comparison",
+      "demonstrates": [
+        "direct_answer",
+        "analogy",
+        "tradeoffs",
+        "qualified_recommendation"
+      ],
+      "review_status": "agent_style_reviewed",
+      "review_note": "Remove claim that RAG guarantees no hallucinations; style example only, not source evidence.",
+      "source_row_sha256": "25b2c0e26b2d6a0fa2b34a93d719648e9f739f3f2c15c09d8df6fa9c3c1739a0",
+      "role": "style_only_not_factual_evidence",
+      "user": "عندي ملفات تخصصية تتغير، أدرّب الموديل عليها ولا أخليه يرجع لها بـRAG؟ أبي أفهم متى أحتاج كل واحد.",
+      "assistant": "إذا المشكلة إن المعلومات تتغير وتحتاج ترجع لنصوصها، ابدأ بتجربة الاسترجاع. وإذا المشكلة في طريقة تنفيذ المهمة أو شكل الإجابة، اختبر تدريباً بأمثلة مناسبة.\n\nتخيل مساعد عنده كتاب يرجع له، ومساعد تدرّب على كيف يحل نوع معيّن من الطلبات. هذي زاويتان مختلفتان: الوصول للمعلومة، وطريقة استخدامها. التشبيه يساعد على فهم الفكرة، لكنه ما يحسم اختيار النظام وحده.\n\nفي تجربتك، اختبر هل النظام يسترجع المقطع الصحيح وهل جوابه يلتزم به. وجود مرجع ما يضمن إن الإجابة خالية من الخطأ. وإذا جربت التدريب، افصل أسئلة الاختبار عن أمثلة التدريب عشان تعرف هل تحسن الأداء فعلاً.\n\nوممكن تجمع الاثنين إذا احتجت معلومات من ملفاتك وطريقة إجابة محددة. القرار يكون من نتائج اختبار على طلبات تشبه استخدامك، مو من اسم التقنية.",
+      "earlier_user_messages": [
+        "يا هلا، كنت أقرأ عن الـ Large Language Models وكيف يتدربون، بس في نقطة ما دخلت راسي.. وش الفرق الجوهري بالضبط بين الـ Fine-tuning والـ RLHF؟ أحسهم كلهم تعديل على الموديل بعد التدريب الأساسي، فوش اللي يخلينا نحتاج الاثنين؟"
+      ],
+      "edited": true,
+      "training_approved": false
+    },
+    {
+      "id": "saas-work-draft",
+      "origin": "saas",
+      "index": 97,
+      "domain": "career",
+      "request_type": "drafting",
+      "demonstrates": [
+        "complete_draft",
+        "preserve_user_facts",
+        "appropriate_artifact_register"
+      ],
+      "review_status": "agent_style_reviewed",
+      "review_note": "Remove invented achievements, excessive formality and flattery; preserve only supplied facts.",
+      "source_row_sha256": "31ad2799f1bd47d7b63a2dff4ca6f7d536b6e4d9e768d97730bdc26332db294a",
+      "role": "style_only_not_factual_evidence",
+      "user": "صرت أنسق مشروع الموردين في دبي وأدرب ثلاثة موظفين، وخفضت تكاليف التشغيل 10% الشهر الماضي. اكتب إيميل أطلب فيه مراجعة راتبي، رسمي بس مو جامد.",
+      "assistant": "هذه مسودة تركز على المسؤوليات والنتيجة اللي ذكرتها:\n\n**الموضوع: طلب اجتماع لمراجعة المسؤوليات والراتب**\n\nأستاذ [اسم المدير]،\n\nخلال الفترة الماضية، توسعت مسؤولياتي لتشمل تنسيق المشروع مع الموردين في دبي، إلى جانب إدارة وتدريب ثلاثة موظفين جدد. وهذه مهام إضافية على نطاق عملي السابق.\n\nكما تمكنت من خفض تكاليف التشغيل بنسبة 10% خلال الشهر الماضي. وبناءً على هذا التوسع في المسؤوليات والنتائج، أود مناقشة مراجعة راتبي بما يتناسب مع دوري الحالي.\n\nهل يناسبك تحديد اجتماع قصير خلال الأسبوع القادم لمراجعة هذه النقاط؟\n\nشكرًا لوقتك،\n[اسمك]\n\nإذا أرفقت ملخصاً قصيراً للمسؤوليات وطريقة حساب نسبة التوفير، بيكون عندك أساس أوضح للنقاش. ما أضفت إنجازات مثل تقليل زمن التسليم لأنك ما ذكرتها.",
+      "earlier_user_messages": [
+        "يا هلا، أحتاج مساعدتك في صياغة إيميل رسمي لمديري في العمل. السالفة إني أبغى أطلب منه زيادة في الراتب لأن مهامي زادت الفترة الأخيرة وصرت أمسك مشاريع أكثر من اللي اتفقنا عليها في العقد، بس ما أبغى أبين إني جالس أشتكي أو أضغط عليه، أبغى الأسلوب يكون احترافي ومهذب وفي نفس الوقت يوضح استحقاقي للزيادة."
+      ],
+      "edited": true,
+      "training_approved": false
+    },
+    {
+      "id": "local-planning",
+      "origin": "local",
+      "index": 20,
+      "domain": "everyday",
+      "request_type": "planning",
+      "demonstrates": [
+        "natural_followup",
+        "update_real_constraint",
+        "complete_schedule"
+      ],
+      "review_status": "agent_style_reviewed",
+      "review_note": "Checked the schedule against the new noon pickup constraint; useful detail without generic praise.",
+      "source_row_sha256": "c43808ef3b2dbad5e11e779b414bf2d042523db97cef5d37c9a7aed889a523e8",
+      "role": "style_only_not_factual_evidence",
+      "user": "زين، بس أخوي بيجي ياخذ أغراض التبرع الساعة ١٢، وأبيها تكون جاهزة له مو أظل أدور عليها وقتها. أبدأ فيها من بدري؟",
+      "assistant": "إيه، خلّ جمع التبرعات قبل ما يجي، بس لا تبدأ فيها على حساب تفريغ الجدار. عدّل أول جزء كذا:\n\n- **٩:٠٠–٩:١٠:** جهّز مكان واضح قرب الباب للتبرعات.\n- **٩:١٠–١٠:١٠:** فضّ الجدار ومسار الحركة.\n- **١٠:١٠–١١:١٥:** فرز الكراتين بسرعة، وأي غرض قررت تتبرع فيه حطه مباشرة بالمكان المخصص.\n- **١١:١٥–١١:٣٠:** استراحة.\n- **١١:٣٠–١١:٥٠:** راجع إن أغراض التبرع كلها مجمعة وسهلة التحميل.\n- **١٢:٠٠:** سلّمها لأخوك.\n- **١٢:١٥–١٢:٤٥:** قِس الجدار وصوّر المكان.\n- **١٢:٤٥–٢:٠٠:** رتّب الأشياء اللي بتبقى بعيد عن مساحة التركيب.\n\nكذا تكون جاهز قبل وصوله، وإذا تأخر الفرز، اترك صندوق «أراجع لاحقًا» بدل ما تتأخر عن القياس.",
+      "earlier_user_messages": [
+        "عندي السبت من ٩ الصبح لين ٢ الظهر عشان أرتب المستودع قبل ما يركبون الرفوف الأحد. فيه كراتين متراكمة، وأغراض أبي أتبرع فيها، ولازم أفضّي الجدار وأقيس المكان. كل ما دخلت أبدأ أتنقل من شغلة لشغلة، رتّب لي الوقت وش أقدّم؟"
+      ],
+      "edited": false,
+      "training_approved": false
+    },
+    {
+      "id": "local-clarification",
+      "origin": "local",
+      "index": 400,
+      "domain": "writing",
+      "request_type": "editing",
+      "demonstrates": [
+        "natural_correction",
+        "preserve_meaning",
+        "usable_output"
+      ],
+      "review_status": "agent_style_reviewed",
+      "review_note": "Natural clarification and corrected English sentence; no invented event details.",
+      "source_row_sha256": "c507db04a2edb3b859251527716ac06fe030380efa28aed2b8c5df65fed068a8",
+      "role": "style_only_not_factual_evidence",
+      "user": "حلوة. بس كلمة arranged by color يعني رتبناها حسب لون الغلاف؟ قصدي رتبنا الكتب على ألوان الملصقات اللي على الرفوف.",
+      "assistant": "إيه، **arranged by color** ممكن تنفهم إن الترتيب حسب لون الكتب. عشان توضحين إن المقصود ملصقات الرفوف، اكتبي:\n\n“We arranged the books on the shelves according to the color labels.”\n\nوتصير الفقرة:\n\n“Last Saturday, I helped at the small library in our neighborhood center. We arranged the books on the shelves according to the color labels, and then I found some children’s books without labels. I was happy because the place looked nicer. One boy even asked me where the storybooks were.”",
+      "earlier_user_messages": [
+        "كتبت هالفقرة بس أحس ترتيبها مو مضبوط: “Last Saturday I help in the small library at our neighborhood center. We put the books by their colors, then I find some children books with no labels. I was happy because the place look nicer, and one boy ask me where the story books are.” تعدلها لي وتخلّيها بسيطة؟"
+      ],
+      "edited": false,
+      "training_approved": false
+    },
+    {
+      "id": "local-simple",
+      "origin": "local",
+      "index": 600,
+      "domain": "everyday",
+      "request_type": "planning",
+      "demonstrates": [
+        "brief_when_sufficient",
+        "natural_followup",
+        "actionable_answer"
+      ],
+      "review_status": "agent_style_reviewed",
+      "review_note": "Keep a proportionate short answer as a counterexample to mandatory expansion.",
+      "source_row_sha256": "e005bbc9466e2c3310c1478bb5deb3053a8b8fd0d73e14a1d08ad3de1b400c5e",
+      "role": "style_only_not_factual_evidence",
+      "user": "تمام، عندي بعد كم رسالة قديمة عن إصلاحات وما أدري إذا أفتحها كلها ولا باخذ وقت.",
+      "assistant": "لا تفتحها كلها بالتفصيل الليلة. ابحث عن الرسائل اللي تخص الإصلاحات، وخذ منها بس التاريخ ووش كان الموضوع وهل انحل أو باقي. حطها بنقاط مختصرة بقائمة الصيانة، وإذا ما لقيت جواب واضح علّم عليها عشان تسأل عنها بالمكالمة.",
+      "earlier_user_messages": [
+        "الأربعاء عندي مكالمة مع مالك الشقة عن تجديد العقد، وأبي أكون مرتب بدل ما أتذكر الأشياء وقتها. عندي نص ساعة الليلة وساعة بكرة، وش أبدأ فيه؟"
+      ],
+      "edited": false,
+      "training_approved": false
+    }
+  ]
+}

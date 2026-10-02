@@ -1,0 +1,334 @@
+version: saudi-natural-v2
+seed: 10012026
+count: 50
+references: ../references/hybrid_references_v2.json
+sources: ../references/hybrid_sources_v2.json
+seed_user_mode: literal_question
+repair_style_once: true
+prefer_shape_compliant: true
+models:
+  writer: openai/gpt-6-luna
+  enhancer: openai/gpt-6-luna
+  judge: openai/gpt-6-luna
+runtime:
+  host: root@135.181.63.163
+  repo: /root/brg
+  output: data_designer/output/saudi_natural_v2_50_refined.jsonl
+  max_parallel_requests: 4
+  batch_size: 10
+  max_exchanges: 2
+  max_tokens: 4096
+  budget_usd: 2.0
+  reserve_per_request_usd: 0.005
+  timeout_seconds: 180
+user_styles:
+- Short ordinary Saudi wording; ask the actual question without a backstory
+openings:
+  direct: 1
+exchange_distribution:
+  1: 55
+  2: 45
+optional_closing_rate: 0.15
+cite_grounded_answers: true
+answer_styles:
+- Lead with the answer, then connected short paragraphs. Avoid a closing recap that
+  repeats the opening.
+- Explain through one concrete example, then relate it to the question. Use worked
+  steps for calculations.
+- Give the answer and the reasons in a small explained list where useful. Do not force
+  generic headings.
+- Use a concise comparison when there are two alternatives; otherwise use natural
+  prose. Tables only for real comparisons.
+- Start with the result, explain how to understand it, then add one useful detail
+  or check. No automatic summary.
+diversity:
+  scale_gate_count: 200
+  max_questions_per_topic: 3
+  min_unique_topic_fraction: 0.4
+  answer_ngram_similarity: 0.72
+question_guidance: Use short everyday Saudi wording. Follow-ups normally 3-12 words,
+  at most 18; one real question only. No polished specifications, invented biography,
+  requests to make every answer shorter, or greetings. Stop when the question is answered.
+  Stay inside the source scope.
+response_guidance: 'Use natural Saudi Arabic with useful Markdown. Developed answers
+  usually 100-220 Arabic whitespace words; instructional answers 130-240; compact
+  date/place questions 45-100. These are shape targets, not filler quotas. Lead with
+  the answer, then relevant explanation or a worked example. Vary the structure: paragraphs,
+  explained steps, a comparison, or an example as appropriate. Do not repeatedly end
+  with a recap. Most follow-ups 50-150 words. Follow the per-chat closing policy for
+  optional next-step offers. Do not mention internal evidence packs or the synthetic
+  recipe to the user.'
+quality_policy:
+  max_user_words: 24
+  min_answer_words: 90
+  min_followup_answer_words: 35
+  max_answer_words: 300
+  require_markdown: true
+depths:
+  developed: '100-220 words: direct answer plus meaningful context/reasoning, using
+    readable Markdown.'
+  compact: '45-100 words: answer the date/place/count directly, add just enough context
+    to avoid ambiguity; no essay.'
+  instructional: '130-240 words: teach through an example, explained steps and a quick
+    check; no repetitive padding.'
+domains:
+  history:
+    weight: 12
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      saudi_explanations:
+        request_type: comparison
+        source_ids:
+        - saudi-first
+        - saudi-second
+        - saudi-recovery
+        - saudi-days
+        depth: developed
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - وش الفرق بين يوم التأسيس واليوم الوطني؟
+        - ليه صارت الرياض عاصمة الدولة السعودية الثانية؟
+        - كيف رجعت الدولة السعودية الثانية بعد سقوط الأولى؟
+        - وش الفرق بين الدولة السعودية الأولى والثانية؟
+        - رتب لي الدول السعودية الثلاث بتواريخها.
+      saudi_dates_places:
+        request_type: factual
+        source_ids:
+        - saudi-first
+        - saudi-days
+        depth: compact
+        quality_policy:
+          min_answer_words: 40
+        cues:
+        - متى بدأت الدولة السعودية الأولى؟
+        - وين كانت عاصمة الدولة السعودية الأولى؟
+        - متى توحدت السعودية باسمها الحالي؟
+      science_history:
+        request_type: explanation
+        source_ids:
+        - ibn-haytham
+        depth: developed
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - ليه ابن الهيثم مهم في تاريخ العلم؟
+        - كيف كان ابن الهيثم يختبر أفكاره؟
+      ancient_places:
+        request_type: factual
+        source_ids:
+        - tutankhamun
+        depth: compact
+        quality_policy:
+          min_answer_words: 40
+        cues:
+        - وين لقوا قبر توت عنخ آمون؟
+      ancient_evidence:
+        request_type: explanation
+        source_ids:
+        - tutankhamun
+        depth: developed
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - ليه قبر توت عنخ آمون مهم؟
+  saudi_sports:
+    weight: 10
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      national_dates:
+        request_type: factual
+        source_ids:
+        - asian-1984
+        - asian-titles
+        depth: compact
+        quality_policy:
+          min_answer_words: 40
+        cues:
+        - متى فاز منتخبنا أول مرة بكأس آسيا؟
+        - وين أقيمت كأس آسيا 1984؟
+        - كم مرة حققت السعودية كأس آسيا ومتى؟
+      national_history:
+        request_type: explanation
+        source_ids:
+        - asian-1984
+        - worldcup-1994
+        depth: developed
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - ليه بطولة 1984 كانت مميزة للسعودية؟
+        - ليه مشاركة السعودية في مونديال 1994 تعتبر إنجاز؟
+        - وش سالفة هدف العويران في بلجيكا؟
+      club_dates:
+        request_type: factual
+        source_ids:
+        - hilal-history
+        - ittihad-history
+        depth: compact
+        quality_policy:
+          min_answer_words: 40
+        cues:
+        - متى تأسس الهلال ووش كان اسمه؟
+        - وين تأسس الاتحاد ومتى؟
+      club_history:
+        request_type: comparison
+        source_ids:
+        - hilal-history
+        - ittihad-history
+        depth: developed
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - ليه تغير اسم الهلال من الأولمبي؟
+        - وش الفرق بين تاريخ الهلال والاتحاد؟
+  public_figures:
+    weight: 8
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      ghazi:
+        request_type: explanation
+        source_ids:
+        - ghazi
+        - ghazi-novel
+        depth: developed
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - من هو غازي القصيبي؟
+        - وش الفرق بين حياة في الإدارة وشقة الحرية؟
+      ghada:
+        request_type: explanation
+        source_ids:
+        - ghada
+        depth: developed
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - ليه غادة المطيري معروفة؟
+      ibn_haytham:
+        request_type: explanation
+        source_ids:
+        - ibn-haytham
+        depth: developed
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - من هو ابن الهيثم ووش أشهر شغله؟
+      zewail:
+        request_type: explanation
+        source_ids:
+        - zewail
+        depth: developed
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - ليه أحمد زويل أخذ نوبل؟
+      zewail_date:
+        request_type: factual
+        source_ids:
+        - zewail
+        depth: compact
+        quality_policy:
+          min_answer_words: 40
+        cues:
+        - متى أخذ أحمد زويل نوبل وبأي تخصص؟
+      mohammed_abdu:
+        request_type: explanation
+        source_ids:
+        - mohammed-abdu
+        depth: developed
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - من هو محمد عبده؟
+        - وين ولد محمد عبده وكيف بدأ مشواره؟
+  homework:
+    weight: 10
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      worked_math:
+        request_type: worked_solution
+        source_ids: []
+        depth: developed
+        quality_policy:
+          min_answer_words: 75
+        cues:
+        - حل 3س + 7 = 22 واشرحها.
+        - كيف أحسب 15٪ من 240؟
+        - حل 2/3 + 1/4 بخطوات.
+        - مستطيل طوله 8 وعرضه 5، طلع المساحة والمحيط.
+        - السعر 200 وعليه خصم 20٪، كم أدفع وليه؟
+      math_concepts:
+        request_type: explanation
+        source_ids: []
+        depth: instructional
+        quality_policy:
+          min_answer_words: 100
+        cues:
+        - وش الفرق بين المحيط والمساحة؟
+        - اشرح لي النسبة والتناسب بمثال.
+      language:
+        request_type: teaching
+        source_ids: []
+        depth: instructional
+        quality_policy:
+          min_answer_words: 100
+        cues:
+        - أعرب جملة الطالب مجتهد.
+        - وش الفرق بين الجملة الاسمية والفعلية؟
+      school_writing:
+        request_type: drafting
+        source_ids: []
+        depth: developed
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - ساعدني أكتب فقرة قصيرة عن التعاون للواجب.
+  teach_child:
+    weight: 7
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      parent_teaching:
+        request_type: teaching
+        source_ids: []
+        depth: instructional
+        quality_policy:
+          min_answer_words: 110
+        cues:
+        - كيف أعلم ولدي الكسور؟
+        - بنتي 7 سنوات، كيف أفهمها الضرب؟
+        - ولدي يلخبط بين يمين ويسار، كيف أعلمه؟
+        - كيف أشرح لبنتي الفرق بين الحرف والكلمة؟
+        - كيف أعلم طفلي يقرأ الساعة؟
+        - أبي أشرح لولدي القسمة بطريقة سهلة.
+        - ولدي ما يفهم المسألة الكلامية، وش أسوي؟
+  science:
+    weight: 3
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      light_explanation:
+        request_type: explanation
+        source_ids:
+        - nasa-light-year
+        depth: developed
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - ليش نشوف النجوم كأننا نشوف الماضي؟
+        - وش الفرق بين السنة الضوئية والسنة العادية؟
+      light_time:
+        request_type: factual
+        source_ids:
+        - nasa-light-year
+        depth: compact
+        quality_policy:
+          min_answer_words: 40
+        cues:
+        - كم يأخذ ضوء الشمس عشان يوصلنا؟

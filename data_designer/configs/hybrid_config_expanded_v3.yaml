@@ -1,0 +1,5593 @@
+version: saudi-expanded-v3
+seed: 10022026
+count: 584
+references: ../references/hybrid_references_v2.json
+sources: ../output/expanded_v3/verified_sources.json
+seed_user_mode: literal_question
+repair_style_once: true
+prefer_shape_compliant: true
+models:
+  writer: openai/gpt-6-luna
+  enhancer: openai/gpt-6-luna
+  judge: openai/gpt-6-luna
+runtime:
+  host: root@135.181.63.163
+  repo: /root/brg
+  output: data_designer/output/saudi_expanded_v3.jsonl
+  max_parallel_requests: 10
+  batch_size: 20
+  max_exchanges: 2
+  max_tokens: 4096
+  budget_usd: 3
+  reserve_per_request_usd: 0.005
+  timeout_seconds: 180
+user_styles:
+- Short ordinary Saudi wording; ask the actual question without a backstory
+openings:
+  direct: 1
+exchange_distribution:
+  1: 75
+  2: 25
+optional_closing_rate: 0.15
+cite_grounded_answers: true
+answer_styles:
+- Lead with the answer, then connected short paragraphs. Avoid a closing recap that
+  repeats the opening.
+- Explain through one concrete example, then relate it to the question. Use worked
+  steps for calculations.
+- Give the answer and the reasons in a small explained list where useful. Do not force
+  generic headings.
+- Use a concise comparison when there are two alternatives; otherwise use natural
+  prose. Tables only for real comparisons.
+- Start with the result, explain how to understand it, then add one useful detail
+  or check. No automatic summary.
+diversity:
+  scale_gate_count: 200
+  max_questions_per_topic: 2
+  min_unique_topic_fraction: 0.5
+  answer_ngram_similarity: 0.72
+question_guidance: Use short everyday Saudi wording. Follow-ups normally 3-12 words,
+  at most 18; one real question only. No polished specifications, invented biography,
+  requests to make every answer shorter, or greetings. Stop when the question is answered.
+  Stay inside the source scope.
+response_guidance: 'Use natural Saudi Arabic and useful Markdown. Match depth to the
+  actual request: narrow facts and one-step calculations may be brief; how/why answers
+  need relevant explanation; homework needs worked reasoning; teaching needs an example
+  and activity. These ranges are targets, never filler quotas. Cite the actual supporting
+  page near each claim. Follow the assigned optional closing policy; end other answers
+  naturally. Avoid repeated recaps and unprompted evidence-availability disclaimers.'
+quality_policy:
+  max_user_words: 24
+  min_answer_words: 90
+  min_followup_answer_words: 35
+  max_answer_words: 1000
+  require_markdown: true
+depths:
+  developed: 'Usually 80-180 words: direct answer with relevant reasons, context or
+    a worked example. Preserve useful depth.'
+  compact: 'Usually 20-90 words: answer the date, place, name, color or score completely.
+    Add context only when useful; never pad.'
+  instructional: 'Usually 110-220 words: parent wording, concrete activity and a check
+    of understanding.'
+  casual: Usually 5-60 words; warm natural conversation, without forced formatting
+    or lecture structure.
+domains:
+  history:
+    weight: 48
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      hegra-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id001
+        - div-hegra-1
+        - div-hegra-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه موقع الحِجر مهم تاريخيًا؟
+          topic_id: hegra
+      hegra-2:
+        request_type: factual
+        depth: compact
+        source_ids: *id001
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى دخل الحِجر قائمة التراث العالمي؟
+          topic_id: hegra
+      turaif-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id002
+        - div-turaif-1
+        - div-turaif-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش يميز حي الطريف في الدرعية؟
+          topic_id: turaif
+      turaif-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id002
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وين يقع الطريف وليه اختارته اليونسكو؟
+          topic_id: turaif
+      historic-jeddah-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id003
+        - div-historic-jeddah-1
+        - div-historic-jeddah-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه جدة التاريخية يسمونها بوابة مكة؟
+          topic_id: historic-jeddah
+      historic-jeddah-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id003
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش المميز في بيوت جدة التاريخية؟
+          topic_id: historic-jeddah
+      hail-rock-art-1:
+        request_type: comparison
+        depth: developed
+        source_ids: &id004
+        - div-hail-rock-art-1
+        - div-hail-rock-art-2
+        - div-hail-rock-art-3
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين نقوش جبة والشويمس؟
+          topic_id: hail-rock-art
+      hail-rock-art-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id004
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف تساعد نقوش حائل نفهم حياة الناس زمان؟
+          topic_id: hail-rock-art
+      ahsa-oasis-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id005
+        - div-ahsa-oasis-1
+        - div-ahsa-oasis-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه واحة الأحساء موقع تراث عالمي؟
+          topic_id: ahsa-oasis
+      ahsa-oasis-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id005
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أثر الماء في تاريخ الأحساء؟
+          topic_id: ahsa-oasis
+      hima-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id006
+        - div-hima-1
+        - div-hima-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وين منطقة حمى وش أهميتها؟
+          topic_id: hima
+      hima-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id006
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش نتعلم من نقوش حمى عن المسافرين زمان؟
+          topic_id: hima
+      uruq-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id007
+        - div-uruq-1
+        - div-uruq-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه عروق بني معارض مهمة؟
+          topic_id: uruq
+      uruq-2:
+        request_type: factual
+        depth: compact
+        source_ids: *id007
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى صارت عروق بني معارض تراثًا عالميًا؟
+          topic_id: uruq
+      historical-center-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id008
+        - div-historical-center-1
+        - div-historical-center-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش هدف مركز الملك عبدالعزيز التاريخي؟
+          topic_id: historical-center
+      historical-center-2:
+        request_type: factual
+        depth: compact
+        source_ids: *id008
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى افتتح المركز التاريخي ووين مكانه؟
+          topic_id: historical-center
+      fahd-library-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id009
+        - div-fahd-library-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش دور مكتبة الملك فهد الوطنية؟
+          topic_id: fahd-library
+      fahd-library-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id009
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف بدأت مكتبة الملك فهد الوطنية؟
+          topic_id: fahd-library
+      masmak-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id010
+        - div-masmak-1
+        - div-masmak-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش كان استخدام قصر المصمك قديمًا؟
+          topic_id: masmak
+      masmak-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id010
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش يميز بناء المصمك عن البيت العادي؟
+          topic_id: masmak
+      suez-opening-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id011
+        - div-suez-opening-1
+        - div-suez-opening-2
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى افتتحت قناة السويس؟
+          topic_id: suez-opening
+      suez-opening-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id011
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه قناة السويس غيرت طرق الملاحة؟
+          topic_id: suez-opening
+      gutenberg-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id012
+        - div-gutenberg-1
+        - div-gutenberg-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه اختراع الطباعة المتحركة كان مهم؟
+          topic_id: gutenberg
+      gutenberg-2:
+        request_type: comparison
+        depth: developed
+        source_ids: *id012
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين الكتاب المخطوط والمطبوع قديمًا؟
+          topic_id: gutenberg
+      rosetta-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id013
+        - div-rosetta-1
+        - div-rosetta-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش مكتوب على حجر رشيد؟
+          topic_id: rosetta
+      rosetta-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id013
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه حجر رشيد ساعدهم يفهمون الهيروغليفية؟
+          topic_id: rosetta
+      magna-carta-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id014
+        - div-magna-carta-1
+        - div-magna-carta-2
+        - div-magna-carta-3
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى ظهرت الماغنا كارتا؟
+          topic_id: magna-carta
+      magna-carta-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id014
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه الماغنا كارتا مهمة في التاريخ؟
+          topic_id: magna-carta
+      silk-roads-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id015
+        - div-silk-roads-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: هل طريق الحرير كان طريقًا واحدًا؟
+          topic_id: silk-roads
+      silk-roads-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id015
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف نقل طريق الحرير أفكارًا مو بس بضائع؟
+          topic_id: silk-roads
+      apollo-11-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id016
+        - div-apollo-11-1
+        - div-apollo-11-2
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: وين نزلت أبولو 11 على القمر؟
+          topic_id: apollo-11
+      apollo-11-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id016
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه رحلة أبولو 11 تعتبر حدثًا تاريخيًا؟
+          topic_id: apollo-11
+      saudi-satellites-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id017
+        - div-saudi-satellites-1
+        - div-saudi-satellites-2
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى أطلقت السعودية أول أقمارها الصناعية؟
+          topic_id: saudi-satellites
+      saudi-satellites-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id017
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش كانت فائدة الأقمار السعودية الأولى؟
+          topic_id: saudi-satellites
+      hijri-calendar-1:
+        request_type: comparison
+        depth: developed
+        source_ids: &id018
+        - div-hijri-calendar-1
+        - div-hijri-calendar-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين التقويم الهجري والميلادي؟
+          topic_id: hijri-calendar
+      hijri-calendar-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id018
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه الأشهر الهجرية تتنقل بين الفصول؟
+          topic_id: hijri-calendar
+      arabic-calligraphy-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id019
+        - div-arabic-calligraphy-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه الخط العربي يعتبر تراثًا ثقافيًا؟
+          topic_id: arabic-calligraphy
+      arabic-calligraphy-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id019
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف تختلف حرفة الخط عن الكتابة العادية؟
+          topic_id: arabic-calligraphy
+      dirah-market-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id020
+        - div-dirah-market-1
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: وين سوق الزل ووش اشتهر فيه؟
+          topic_id: dirah-market
+      dirah-market-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id020
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه الأسواق القديمة مهمة لفهم تاريخ الرياض؟
+          topic_id: dirah-market
+      saudi-railway-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id021
+        - div-saudi-railway-1
+        - div-saudi-railway-2
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى بدأ أول خط قطار بالسعودية؟
+          topic_id: saudi-railway
+      saudi-railway-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id021
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف ساعد القطار يربط الشرقية بالرياض؟
+          topic_id: saudi-railway
+      hejaz-railway-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id022
+        - div-hejaz-railway-1
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: وين كان مسار سكة حديد الحجاز؟
+          topic_id: hejaz-railway
+      hejaz-railway-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id022
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه انبنت سكة حديد الحجاز؟
+          topic_id: hejaz-railway
+      saudi-flag-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id023
+        - div-saudi-flag-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف تطور شكل العلم السعودي؟
+          topic_id: saudi-flag
+      saudi-flag-2:
+        request_type: comparison
+        depth: developed
+        source_ids: *id023
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين العلم الوطني وعلم الملك؟
+          topic_id: saudi-flag
+      saudi-tv-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id024
+        - div-saudi-tv-1
+        - div-saudi-tv-2
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى بدأ البث التلفزيوني السعودي؟
+          topic_id: saudi-tv
+      saudi-tv-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id024
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف كانت بداية التلفزيون السعودي؟
+          topic_id: saudi-tv
+  saudi_sports:
+    weight: 40
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      nassr-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id025
+        - div-nassr-1
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: وين تأسس النصر ومتى؟
+          topic_id: nassr
+      nassr-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id025
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه ألوان النصر أصفر وأزرق؟
+          topic_id: nassr
+      ahli-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id026
+        - div-ahli-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش قصة بداية الأهلي في جدة؟
+          topic_id: ahli
+      ahli-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id026
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش دور أكاديمية الأهلي اللي تأسست عام 2005؟
+          topic_id: ahli
+      shabab-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id027
+        - div-shabab-1
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: وين كانت بداية نادي الشباب؟
+          topic_id: shabab
+      shabab-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id027
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف تطور اسم نادي الشباب؟
+          topic_id: shabab
+      ettifaq-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id028
+        - div-ettifaq-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف تأسس نادي الاتفاق؟
+          topic_id: ettifaq
+      ettifaq-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id028
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه سموه نادي الاتفاق؟
+          topic_id: ettifaq
+      qadsiah-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id029
+        - div-qadsiah-1
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى تأسس القادسية ووين؟
+          topic_id: qadsiah
+      qadsiah-2:
+        request_type: comparison
+        depth: developed
+        source_ids: *id029
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين بداية القادسية عام 1967 وجذوره عام 1935؟
+          topic_id: qadsiah
+      taawoun-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id030
+        - div-taawoun-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف بدأ نادي التعاون في بريدة؟
+          topic_id: taawoun
+      taawoun-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id030
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش قصة أول كأس ملك للتعاون عام 2019؟
+          topic_id: taawoun
+      fateh-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id031
+        - div-fateh-1
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى تأسس الفتح ووين؟
+          topic_id: fateh
+      fateh-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id031
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه لقب الدوري كان محطة مهمة للفتح؟
+          topic_id: fateh
+      saudi-cup-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id032
+        - div-saudi-cup-1
+        - div-saudi-cup-2
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى بدأت بطولة كأس السعودية للخيل؟
+          topic_id: saudi-cup
+      saudi-cup-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id032
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش يميز كأس السعودية عن سباقات السيارات؟
+          topic_id: saudi-cup
+      saudi-olympic-medals-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id033
+        - div-saudi-olympic-medals-1
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى أخذت السعودية أول ميداليات أولمبية؟
+          topic_id: saudi-olympic-medals
+      saudi-olympic-medals-2:
+        request_type: comparison
+        depth: developed
+        source_ids: *id033
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين إنجاز هادي صوعان وخالد العيد؟
+          topic_id: saudi-olympic-medals
+      sarah-attar-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id034
+        - div-sarah-attar-1
+        - div-sarah-attar-2
+        - div-sarah-attar-3
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هي سارة عطار؟
+          topic_id: sarah-attar
+      sarah-attar-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id034
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه مشاركة سارة عطار في لندن كانت مهمة؟
+          topic_id: sarah-attar
+      dunya-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id035
+        - div-dunya-1
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: وش إنجاز دنيا أبو طالب في التايكوندو؟
+          topic_id: dunya
+      dunya-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id035
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه تأهل دنيا لألعاب باريس كان مميز؟
+          topic_id: dunya
+      jeddah-f1-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id036
+        - div-jeddah-f1-1
+        - div-jeddah-f1-2
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى أقيم أول سباق فورمولا 1 بالسعودية؟
+          topic_id: jeddah-f1
+      jeddah-f1-2:
+        request_type: factual
+        depth: compact
+        source_ids: *id036
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: وين تقع حلبة جدة وكم منعطف فيها؟
+          topic_id: jeddah-f1
+      saudi-dakar-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id037
+        - div-saudi-dakar-1
+        - div-saudi-dakar-2
+        - div-saudi-dakar-3
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى استضافت السعودية رالي داكار أول مرة؟
+          topic_id: saudi-dakar
+      saudi-dakar-2:
+        request_type: comparison
+        depth: developed
+        source_ids: *id037
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين رالي داكار وسباق الحلبة؟
+          topic_id: saudi-dakar
+      majed-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id038
+        - div-majed-1
+        - div-majed-2
+        - div-majed-3
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: وش دور ماجد عبدالله في نهائي آسيا 1984؟
+          topic_id: majed
+      majed-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id038
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه ماجد عبدالله اسم مهم في تاريخ منتخبنا؟
+          topic_id: majed
+      yasser-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id039
+        - div-yasser-1
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: وش إنجاز ياسر القحطاني عام 2007؟
+          topic_id: yasser
+      yasser-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id039
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه جائزة أفضل لاعب آسيوي كانت مهمة لياسر؟
+          topic_id: yasser
+      sami-jaber-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id040
+        - div-sami-jaber-1
+        - div-sami-jaber-2
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: كم نسخة مونديال شارك فيها سامي الجابر؟
+          topic_id: sami-jaber
+      sami-jaber-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id040
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش يميز مسيرة سامي الجابر مع المنتخب؟
+          topic_id: sami-jaber
+      nawaf-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id041
+        - div-nawaf-1
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى أخذ نواف التمياط أفضل لاعب آسيوي؟
+          topic_id: nawaf
+      nawaf-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id041
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش أبرز إنجازات نواف التمياط مع النادي والمنتخب؟
+          topic_id: nawaf
+      deayea-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id042
+        - div-deayea-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش أشهر إنجازات محمد الدعيع؟
+          topic_id: deayea
+      deayea-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id042
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش يميز دور الحارس في مسيرة الدعيع؟
+          topic_id: deayea
+      u19-2018-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id043
+        - div-u19-2018-1
+        - div-u19-2018-2
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: وين حقق منتخب الشباب كأس آسيا 2018؟
+          topic_id: u19-2018
+      u19-2018-2:
+        request_type: comparison
+        depth: developed
+        source_ids: *id043
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين بطولة الشباب وبطولة المنتخب الأول؟
+          topic_id: u19-2018
+      hilal-2019-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id044
+        - div-hilal-2019-1
+        - div-hilal-2019-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش قصة لقب الهلال الآسيوي عام 2019؟
+          topic_id: hilal-2019
+      hilal-2019-2:
+        request_type: factual
+        depth: compact
+        source_ids: *id044
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: مين واجه الهلال في نهائي آسيا 2019؟
+          topic_id: hilal-2019
+  public_figures:
+    weight: 32
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      rayyanah-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id045
+        - div-rayyanah-1
+        - div-rayyanah-2
+        - div-rayyanah-3
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هي ريانة برناوي؟
+          topic_id: rayyanah
+      rayyanah-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id045
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش كانت مهمة ريانة برناوي في الفضاء؟
+          topic_id: rayyanah
+      ali-qarni-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id046
+        - div-ali-qarni-1
+        - div-ali-qarni-2
+        - div-ali-qarni-3
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هو علي القرني؟
+          topic_id: ali-qarni
+      ali-qarni-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id046
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف انتقل علي القرني من الطيران للفضاء؟
+          topic_id: ali-qarni
+      sultan-space-1:
+        request_type: factual
+        depth: compact
+        source_ids: &id047
+        - div-sultan-space-1
+        - div-sultan-space-2
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى راح الأمير سلطان بن سلمان للفضاء؟
+          topic_id: sultan-space
+      sultan-space-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id047
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش كانت مهمة سلطان بن سلمان في الرحلة؟
+          topic_id: sultan-space
+      rabeeah-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id048
+        - div-rabeeah-1
+        - div-rabeeah-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هو عبدالله الربيعة؟
+          topic_id: rabeeah
+      rabeeah-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id048
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش دور عبدالله الربيعة في برنامج فصل التوائم؟
+          topic_id: rabeeah
+      hayat-sindi-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id049
+        - div-hayat-sindi-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هي حياة سندي؟
+          topic_id: hayat-sindi
+      hayat-sindi-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id049
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش مجال أبحاث حياة سندي؟
+          topic_id: hayat-sindi
+      manal-dowayan-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id050
+        - div-manal-dowayan-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هي منال الضويان؟
+          topic_id: manal-dowayan
+      manal-dowayan-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id050
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف تستخدم منال الضويان الفن الجماعي؟
+          topic_id: manal-dowayan
+      ahmed-mater-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id051
+        - div-ahmed-mater-1
+        - div-ahmed-mater-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هو أحمد ماطر؟
+          topic_id: ahmed-mater
+      ahmed-mater-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id051
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش المواضيع اللي يشتغل عليها أحمد ماطر؟
+          topic_id: ahmed-mater
+      gharem-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id052
+        - div-gharem-1
+        - div-gharem-2
+        - div-gharem-3
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هو عبدالناصر غارم؟
+          topic_id: gharem
+      gharem-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id052
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف يستخدم غارم الأختام في أعماله؟
+          topic_id: gharem
+      munif-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id053
+        - div-munif-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هو عبدالرحمن منيف؟
+          topic_id: munif
+      munif-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id053
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش تتناول رواية مدن الملح؟
+          topic_id: munif
+      taha-hussein-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id054
+        - div-taha-hussein-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هو طه حسين؟
+          topic_id: taha-hussein
+      taha-hussein-2:
+        request_type: comparison
+        depth: developed
+        source_ids: *id054
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين الأيام والرواية الخيالية؟
+          topic_id: taha-hussein
+      mahfouz-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id055
+        - div-mahfouz-1
+        - div-mahfouz-2
+        - div-mahfouz-3
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه نجيب محفوظ أخذ نوبل؟
+          topic_id: mahfouz
+      mahfouz-2:
+        request_type: factual
+        depth: compact
+        source_ids: *id055
+        quality_policy:
+          min_answer_words: 15
+        cues:
+        - question: متى أخذ نجيب محفوظ نوبل وبأي مجال؟
+          topic_id: mahfouz
+      zaha-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id056
+        - div-zaha-1
+        - div-zaha-2
+        - div-zaha-3
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هي زها حديد؟
+          topic_id: zaha
+      zaha-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id056
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه فوز زها حديد ببريتزكر كان مهم؟
+          topic_id: zaha
+      mirzakhani-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id057
+        - div-mirzakhani-1
+        - div-mirzakhani-2
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هي مريم ميرزاخاني؟
+          topic_id: mirzakhani
+      mirzakhani-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id057
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش مجال أبحاث مريم ميرزاخاني؟
+          topic_id: mirzakhani
+      talal-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id058
+        - div-talal-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هو طلال مداح؟
+          topic_id: talal
+      talal-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id058
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف بدأ طلال مداح مشواره الفني؟
+          topic_id: talal
+      sami-angawi-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id059
+        - div-sami-angawi-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هو سامي عنقاوي؟
+          topic_id: sami-angawi
+      sami-angawi-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id059
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف يربط سامي عنقاوي العمارة بالتراث؟
+          topic_id: sami-angawi
+      noura-astronaut-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id060
+        - div-noura-astronaut-1
+        - div-noura-astronaut-2
+        - div-noura-astronaut-3
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: من هي نورا المطروشي؟
+          topic_id: noura-astronaut
+      noura-astronaut-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id060
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش أهمية اختيار نورا المطروشي لبرنامج رواد الفضاء؟
+          topic_id: noura-astronaut
+  homework:
+    weight: 40
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      decimal-arithmetic-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: حل 3.75 + 1.8 واشرح ترتيب الأرقام.
+          topic_id: decimal-arithmetic
+      decimal-arithmetic-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: كيف أطرح 2.85 من 6.2؟
+          topic_id: decimal-arithmetic
+      fraction-comparison-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: أيهما أكبر 5/6 ولا 3/4 وليه؟
+          topic_id: fraction-comparison
+      fraction-comparison-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: بسط 18/24 واشرح الطريقة.
+          topic_id: fraction-comparison
+      exponents-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: وش معنى 2 أس 3 وكم يساوي؟
+          topic_id: exponents
+      exponents-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: كيف أحسب 2 أس 3 ضرب 2 أس 2؟
+          topic_id: exponents
+      square-roots-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: كم جذر 81 وكيف أتأكد؟
+          topic_id: square-roots
+      square-roots-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: وش الفرق بين تربيع العدد وأخذ جذره؟
+          topic_id: square-roots
+      negative-numbers-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: حل -4 + 9 واشرحها بخط الأعداد.
+          topic_id: negative-numbers
+      negative-numbers-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: ليه سالب 3 ضرب سالب 5 يطلع موجب؟
+          topic_id: negative-numbers
+      inequalities-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: حل 2س + 3 أصغر من 11.
+          topic_id: inequalities
+      inequalities-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: ليه نقلب علامة المتباينة إذا ضربنا بسالب؟
+          topic_id: inequalities
+      mean-median-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: طلع المتوسط والوسيط للأعداد 3 و4 و8 و9 و11.
+          topic_id: mean-median
+      mean-median-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: ليه المتوسط يتأثر بالعدد الكبير أكثر من الوسيط؟
+          topic_id: mean-median
+      mode-range-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: طلع المنوال والمدى للأعداد 2 و2 و3 و5 و8.
+          topic_id: mode-range
+      mode-range-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: وش الفرق بين المنوال والمدى؟
+          topic_id: mode-range
+      unit-rate-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: خمسة أقلام بعشرين ريال، كم سعر القلم؟
+          topic_id: unit-rate
+      unit-rate-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: إذا سعر القلم 4 ريالات، كم أدفع لسبعة أقلام؟
+          topic_id: unit-rate
+      triangle-geometry-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: مثلث قاعدته 10 وارتفاعه 6، كم مساحته؟
+          topic_id: triangle-geometry
+      triangle-geometry-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: مثلث قائم ضلعاه 6 و8، كم الوتر؟
+          topic_id: triangle-geometry
+      circle-geometry-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: دائرة نصف قطرها 7، طلع المحيط باستخدام ط = 22/7.
+          topic_id: circle-geometry
+      circle-geometry-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: دائرة نصف قطرها 7، احسب المساحة باستخدام ط = 22/7.
+          topic_id: circle-geometry
+      probability-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: وش احتمال يطلع رقم زوجي إذا رميت نردًا؟
+          topic_id: probability
+      probability-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: كيس فيه كرتان حمراء وثلاث زرقاء، وش احتمال الأزرق؟
+          topic_id: probability
+      gcd-lcm-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: طلع القاسم المشترك الأكبر للعددين 12 و18.
+          topic_id: gcd-lcm
+      gcd-lcm-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: وش الفرق بين القاسم الأكبر والمضاعف الأصغر؟
+          topic_id: gcd-lcm
+      unit-conversion-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: حول 2.4 متر إلى سنتيمتر واشرحها.
+          topic_id: unit-conversion
+      unit-conversion-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: 750 جرام كم تساوي بالكيلوجرام؟
+          topic_id: unit-conversion
+      speed-distance-time-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: سيارة قطعت 120 كيلو بساعتين، كم سرعتها المتوسطة؟
+          topic_id: speed-distance-time
+      speed-distance-time-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: مسافة 90 كيلو بسرعة 60، كم يأخذ الطريق؟
+          topic_id: speed-distance-time
+      kana-inna-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: 'أعرب: كان الجو جميلًا.'
+          topic_id: kana-inna
+      kana-inna-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: وش يتغير إذا قلنا إن الطالب مجتهد؟
+          topic_id: kana-inna
+      hamza-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: وش الفرق بين همزة الوصل والقطع؟
+          topic_id: hamza
+      hamza-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: صنف همزة اسم وأحمد واكتب.
+          topic_id: hamza
+      punctuation-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: وش الفرق بين الفاصلة والفاصلة المنقوطة؟
+          topic_id: punctuation
+      punctuation-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: 'حط الترقيم: ذهب الطفل للمكتبة واشترى قصة ثم قرأها.'
+          topic_id: punctuation
+      english-tenses-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: وش الفرق بين I went وI have gone؟
+          topic_id: english-tenses
+      english-tenses-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: أعطني مثالين يوضحون الماضي البسيط والمضارع التام.
+          topic_id: english-tenses
+      english-quantifiers-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: متى أستخدم some ومتى any؟
+          topic_id: english-quantifiers
+      english-quantifiers-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 20
+        cues:
+        - question: 'صحح: I do not have some water.'
+          topic_id: english-quantifiers
+  teach_child:
+    weight: 28
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      child-money-1:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أعلم طفلي يعد الفلوس؟
+          topic_id: child-money
+      child-money-2:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: ولدي معه 10 واشترى بشيء سعره 7، كيف أشرح الباقي؟
+          topic_id: child-money
+      shoe-tying-1:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أعلم بنتي تربط جزمتها؟
+          topic_id: shoe-tying
+      shoe-tying-2:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: طفلي يتلخبط بخطوات ربط الحذاء، كيف أبسطها؟
+          topic_id: shoe-tying
+      week-order-1:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أعلم طفلي ترتيب أيام الأسبوع؟
+          topic_id: week-order
+      week-order-2:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: ولدي يخلط بين أمس وبكرة، كيف أوضحها؟
+          topic_id: week-order
+      calendar-reading-1:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أعلم بنتي تقرأ التقويم؟
+          topic_id: calendar-reading
+      calendar-reading-2:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أوضح لطفلي الفرق بين اليوم والشهر؟
+          topic_id: calendar-reading
+      place-value-1:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أشرح لطفلي العشرات والآحاد؟
+          topic_id: place-value
+      place-value-2:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: ولدي يشوف 24 كأنه 2 و4 بس، كيف أوضح قيمتهم؟
+          topic_id: place-value
+      multiplication-arrays-1:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أعلم بنتي الضرب بصفوف المكعبات؟
+          topic_id: multiplication-arrays
+      multiplication-arrays-2:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: ليه 3 ضرب 4 نفس 4 ضرب 3؟ اشرحها لطفلي.
+          topic_id: multiplication-arrays
+      story-comprehension-1:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: 'ساعد بنتي تفهم: ضاع قلم ريم فسألت أختها ولقته بالحقيبة.'
+          topic_id: story-comprehension
+      story-comprehension-2:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أعلم طفلي يجاوب مين ووين من القصة؟
+          topic_id: story-comprehension
+      story-sequencing-1:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أعلم بنتي ترتب أحداث قصة؟
+          topic_id: story-sequencing
+      story-sequencing-2:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: طفلي يلخبط البداية والنهاية، أعطني نشاطًا بسيطًا.
+          topic_id: story-sequencing
+      rhyming-1:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أعلم طفلي القافية بأمثلة سهلة؟
+          topic_id: rhyming
+      rhyming-2:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: أعطني لعبة كلمات نهايتها نفس الصوت.
+          topic_id: rhyming
+      letter-dots-1:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: ولدي يخلط ب وت وث، كيف أعلمه؟
+          topic_id: letter-dots
+      letter-dots-2:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أخلي بنتي تنتبه لمكان النقاط بالحروف؟
+          topic_id: letter-dots
+      syllables-1:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أدرب طفلي يقسم الكلمة لمقاطع؟
+          topic_id: syllables
+      syllables-2:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: أعطني لعبة تصفيق تساعد بنتي تميز المقاطع.
+          topic_id: syllables
+      estimation-1:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أعلم طفلي يخمن الطول قبل القياس؟
+          topic_id: estimation
+      estimation-2:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أشرح لبنتي الفرق بين التخمين والعد؟
+          topic_id: estimation
+      homework-routine-1:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: بنتي تتشتت بالواجب، كيف أقسمه معها؟
+          topic_id: homework-routine
+      homework-routine-2:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أخلي طفلي يبدأ الواجب بدون ما أحل عنه؟
+          topic_id: homework-routine
+      shape-sorting-1:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: كيف أعلم بنتي تفرق بين الأشكال؟
+          topic_id: shape-sorting
+      shape-sorting-2:
+        request_type: teaching
+        depth: instructional
+        source_ids: []
+        quality_policy:
+          min_answer_words: 90
+        cues:
+        - question: أعطني لعبة فرز دائرة ومثلث ومستطيل.
+          topic_id: shape-sorting
+  science:
+    weight: 12
+    profile: deep
+    grounding_mode: grounded
+    subdomains:
+      water-cycle-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id061
+        - div-water-cycle-1
+        - div-water-cycle-2
+        - div-water-cycle-3
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف تمشي دورة الماء؟
+          topic_id: water-cycle
+      water-cycle-2:
+        request_type: comparison
+        depth: developed
+        source_ids: *id061
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين التبخر والتكاثف؟
+          topic_id: water-cycle
+      seasons-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id062
+        - div-seasons-1
+        - div-seasons-2
+        - div-seasons-3
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه تتغير الفصول خلال السنة؟
+          topic_id: seasons
+      seasons-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id062
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: هل الصيف يصير لأن الأرض أقرب للشمس؟
+          topic_id: seasons
+      moon-phases-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id063
+        - div-moon-phases-1
+        - div-moon-phases-2
+        - div-moon-phases-3
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه شكل القمر يتغير خلال الشهر؟
+          topic_id: moon-phases
+      moon-phases-2:
+        request_type: comparison
+        depth: developed
+        source_ids: *id063
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين الهلال والقمر الكامل؟
+          topic_id: moon-phases
+      orbital-fall-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id064
+        - div-orbital-fall-1
+        - div-orbital-fall-2
+        - div-orbital-fall-3
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه رواد الفضاء يطفون داخل المحطة؟
+          topic_id: orbital-fall
+      orbital-fall-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id064
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: هل انعدام الوزن يعني ما فيه جاذبية؟
+          topic_id: orbital-fall
+      photosynthesis-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id065
+        - div-photosynthesis-1
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف تصنع النباتات غذاءها؟
+          topic_id: photosynthesis
+      photosynthesis-2:
+        request_type: explanation
+        depth: developed
+        source_ids: *id065
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه الضوء مهم للنبات؟
+          topic_id: photosynthesis
+      lightning-thunder-1:
+        request_type: explanation
+        depth: developed
+        source_ids: &id066
+        - div-lightning-thunder-1
+        - div-lightning-thunder-2
+        - div-lightning-thunder-3
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه نشوف البرق قبل ما نسمع الرعد؟
+          topic_id: lightning-thunder
+      lightning-thunder-2:
+        request_type: comparison
+        depth: developed
+        source_ids: *id066
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين البرق والرعد؟
+          topic_id: lightning-thunder
+  cooking:
+    weight: 44
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      kabsa-recipe-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أسوي كبسة دجاج بسيطة؟
+          topic_id: kabsa-recipe
+      kabsa-recipe-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أضبط كمية رز الكبسة لشخصين؟
+          topic_id: kabsa-recipe
+      jareesh-recipe-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أسوي جريش بقوام ناعم؟
+          topic_id: jareesh-recipe
+      jareesh-recipe-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: جريشي طلع ثقيل، كيف أخففه؟
+          topic_id: jareesh-recipe
+      saleeg-recipe-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أسوي سليق بسيط؟
+          topic_id: saleeg-recipe
+      saleeg-recipe-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش أسوي إذا رز السليق ما لان؟
+          topic_id: saleeg-recipe
+      lentil-soup-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني شوربة عدس سهلة.
+          topic_id: lentil-soup
+      lentil-soup-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أضبط قوام شوربة العدس؟
+          topic_id: lentil-soup
+      tomato-pasta-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أسوي مكرونة بصلصة طماطم؟
+          topic_id: tomato-pasta
+      tomato-pasta-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه الصلصة ما تمسك بالمكرونة؟
+          topic_id: tomato-pasta
+      pancakes-recipe-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني وصفة بانكيك لشخصين.
+          topic_id: pancakes-recipe
+      pancakes-recipe-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: البانكيك يطلع ثقيل، وش أغير؟
+          topic_id: pancakes-recipe
+      rice-water-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه الرز يطلع معجن؟
+          topic_id: rice-water
+      rice-water-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أعرف كمية الماء المناسبة للرز؟
+          topic_id: rice-water
+      onion-browning-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أحمر البصل بدون ما يحترق؟
+          topic_id: onion-browning
+      onion-browning-2:
+        request_type: comparison
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين تشويح البصل وكرملته؟
+          topic_id: onion-browning
+      bread-dough-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أعرف إن العجينة انعجنت كفاية؟
+          topic_id: bread-dough
+      bread-dough-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: العجينة تلصق بيدي، أزيد دقيق؟
+          topic_id: bread-dough
+      salad-dressing-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أسوي صوص سلطة من الموجود؟
+          topic_id: salad-dressing
+      salad-dressing-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أوازن الحموضة والزيت بالصوص؟
+          topic_id: salad-dressing
+      roast-potatoes-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أسوي بطاطس مقرمشة بالفرن؟
+          topic_id: roast-potatoes
+      roast-potatoes-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه البطاطس تطلع طرية مو مقرمشة؟
+          topic_id: roast-potatoes
+      recipe-scaling-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وصفة لأربعة، كيف أخليها لاثنين؟
+          topic_id: recipe-scaling
+      recipe-scaling-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: هل أضاعف وقت الطبخ إذا ضاعفت المقادير؟
+          topic_id: recipe-scaling
+      shakshuka-recipe-1:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أسوي شكشوكة لشخص واحد؟
+          topic_id: shakshuka-recipe
+      shakshuka-recipe-2:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: صلصة الشكشوكة طلعت مائية، وش أسوي؟
+          topic_id: shakshuka-recipe
+      oatmeal-breakfast-1:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني فطور شوفان مو حلو كثير.
+          topic_id: oatmeal-breakfast
+      oatmeal-breakfast-2:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أضبط قوام الشوفان؟
+          topic_id: oatmeal-breakfast
+      hummus-recipe-1:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أسوي حمص ناعم بالبيت؟
+          topic_id: hummus-recipe
+      hummus-recipe-2:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: الحمص طلع ثقيل، كيف أعدله؟
+          topic_id: hummus-recipe
+      vegetable-soup-1:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي جزر وكوسة، وش أسوي فيهم؟
+          topic_id: vegetable-soup
+      vegetable-soup-2:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني شوربة خضار بدون كريمة.
+          topic_id: vegetable-soup
+      vegetable-stir-fry-1:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أشوح الخضار وتبقى مقرمشة؟
+          topic_id: vegetable-stir-fry
+      vegetable-stir-fry-2:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه الخضار تطلع ماء بالمقلاة؟
+          topic_id: vegetable-stir-fry
+      omelette-technique-1:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أسوي أومليت ما يتقطع؟
+          topic_id: omelette-technique
+      omelette-technique-2:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش حشوة بسيطة للأومليت؟
+          topic_id: omelette-technique
+      homemade-pizza-1:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أسوي بيتزا بمكونات بسيطة؟
+          topic_id: homemade-pizza
+      homemade-pizza-2:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه وسط البيتزا يطلع رطب؟
+          topic_id: homemade-pizza
+      ingredient-substitution-1:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ما عندي زبدة، وش أستخدم بالكيك؟
+          topic_id: ingredient-substitution
+      ingredient-substitution-2:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أعرف إذا البديل يغير قوام الوصفة؟
+          topic_id: ingredient-substitution
+      pan-heat-1:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه الأكل يلصق بالمقلاة؟
+          topic_id: pan-heat
+      pan-heat-2:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أعرف المقلاة سخنت كفاية؟
+          topic_id: pan-heat
+      meal-leftovers-1:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي رز مطبوخ، عطني فكرة غير تسخينه.
+          topic_id: meal-leftovers
+      meal-leftovers-2:
+        request_type: recipe
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش أسوي بالخضار الزايدة للعشاء؟
+          topic_id: meal-leftovers
+  languages:
+    weight: 44
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      english-articles-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: متى أستخدم a ومتى an؟
+          topic_id: english-articles
+      english-articles-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليش نقول an hour مو a hour؟
+          topic_id: english-articles
+      english-prepositions-1:
+        request_type: comparison
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين in وon وat؟
+          topic_id: english-prepositions
+      english-prepositions-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أقول on Monday ولا in Monday؟
+          topic_id: english-prepositions
+      english-polite-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أطلب مساعدة بالإنجليزي بأدب؟
+          topic_id: english-polite
+      english-polite-2:
+        request_type: comparison
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين can you وcould you؟
+          topic_id: english-polite
+      english-false-friends-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش معنى actually؟
+          topic_id: english-false-friends
+      english-false-friends-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: هل actual معناها حالي؟
+          topic_id: english-false-friends
+      english-pronunciation-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه ما ننطق k في know؟
+          topic_id: english-pronunciation
+      english-pronunciation-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني كلمات فيها حروف ما تنطق.
+          topic_id: english-pronunciation
+      english-translation-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أقول يعطيك العافية بالإنجليزي؟
+          topic_id: english-translation
+      english-translation-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: هل الترجمة الحرفية دايم تضبط؟
+          topic_id: english-translation
+      arabic-register-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: حوّل وش تبي إلى صيغة فصحى مهذبة.
+          topic_id: arabic-register
+      arabic-register-2:
+        request_type: comparison
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين الفصحى والعامية في هالجملة؟
+          topic_id: arabic-register
+      arabic-gender-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليش نقول هذه شمس وهذا قمر؟
+          topic_id: arabic-gender
+      arabic-gender-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني أمثلة على التأنيث في الجمل.
+          topic_id: arabic-gender
+      arabic-dual-1:
+        request_type: comparison
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين طالبان وطالبين؟
+          topic_id: arabic-dual
+      arabic-dual-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: صحح جملة رأيت طالبان.
+          topic_id: arabic-dual
+      spanish-greetings-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: علمني أعرّف بنفسي بالإسباني.
+          topic_id: spanish-greetings
+      spanish-greetings-2:
+        request_type: comparison
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين hola وbuenos días؟
+          topic_id: spanish-greetings
+      french-basics-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أطلب قهوة بالفرنسي؟
+          topic_id: french-basics
+      french-basics-2:
+        request_type: comparison
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين tu وvous؟
+          topic_id: french-basics
+      language-practice-1:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: تدرب معي على محادثة إنجليزي بسيطة.
+          topic_id: language-practice
+      language-practice-2:
+        request_type: explanation
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'صحح لي: She go to school every day.'
+          topic_id: language-practice
+      english-conditionals-1:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين if I go وif I went؟
+          topic_id: english-conditionals
+      english-conditionals-2:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'صحح لي: If it rains, I will stay home.'
+          topic_id: english-conditionals
+      english-passive-1:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين المبني للمعلوم والمجهول بالإنجليزي؟
+          topic_id: english-passive
+      english-passive-2:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: حول Someone broke the window للمجهول.
+          topic_id: english-passive
+      english-reported-speech-1:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أنقل كلام شخص بالإنجليزي؟
+          topic_id: english-reported-speech
+      english-reported-speech-2:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: حوّل I am tired إلى كلام منقول.
+          topic_id: english-reported-speech
+      english-countability-1:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه نقول much water مو many water؟
+          topic_id: english-countability
+      english-countability-2:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: هل advice لها جمع بالإنجليزي؟
+          topic_id: english-countability
+      english-idioms-1:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش معنى break the ice؟
+          topic_id: english-idioms
+      english-idioms-2:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني تعبير إنجليزي عن شيء سهل.
+          topic_id: english-idioms
+      english-email-register-1:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أبدأ إيميل إنجليزي رسمي؟
+          topic_id: english-email-register
+      english-email-register-2:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'خل هالجملة ألطف: Send it now.'
+          topic_id: english-email-register
+      arabic-agreement-1:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه نقول الكتب الجديدة مو الجدد؟
+          topic_id: arabic-agreement
+      arabic-agreement-2:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'صحح: هذه طالب مجتهد.'
+          topic_id: arabic-agreement
+      arabic-plurals-1:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين جمع التكسير وجمع المذكر السالم؟
+          topic_id: arabic-plurals
+      arabic-plurals-2:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني جمع كتاب ومعلم مع مثال.
+          topic_id: arabic-plurals
+      japanese-introductions-1:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أقول شكرًا بالياباني؟
+          topic_id: japanese-introductions
+      japanese-introductions-2:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: علمني تحية يابانية مع نطقها بالعربي.
+          topic_id: japanese-introductions
+      german-basics-1:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أقول صباح الخير بالألماني؟
+          topic_id: german-basics
+      german-basics-2:
+        request_type: language_practice
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: علمني أطلب ماء بالألماني.
+          topic_id: german-basics
+  chitchat:
+    weight: 40
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      chat-bored-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: طفشان اليوم.
+          topic_id: chat-bored
+      chat-bored-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: ودي أسوي شيء بس مالي خلق.
+          topic_id: chat-bored
+      chat-day-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: خلنا نسولف شوي.
+          topic_id: chat-day
+      chat-day-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: كان يومي طويل.
+          topic_id: chat-day
+      chat-small-win-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: أخيرًا خلصت شغلة كنت مأجلها.
+          topic_id: chat-small-win
+      chat-small-win-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: اليوم ضبطت معي القهوة.
+          topic_id: chat-small-win
+      chat-weekend-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: وش نسوي بالويكند؟
+          topic_id: chat-weekend
+      chat-weekend-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: ودي ويكند هادي بدون طلعات كثيرة.
+          topic_id: chat-weekend
+      chat-nostalgia-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: اشتقت لأيام أشرطة الألعاب.
+          topic_id: chat-nostalgia
+      chat-nostalgia-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: تتذكر صوت مودم الإنترنت القديم؟
+          topic_id: chat-nostalgia
+      chat-preferences-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: بحر ولا جبل؟
+          topic_id: chat-preferences
+      chat-preferences-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: قهوة ولا شاي؟
+          topic_id: chat-preferences
+      chat-imagination-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: لو عندك آلة زمن وين تروح؟
+          topic_id: chat-imagination
+      chat-imagination-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: تخيل القطط تتكلم، وش بتقول؟
+          topic_id: chat-imagination
+      chat-joke-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: عطني نكتة خفيفة.
+          topic_id: chat-joke
+      chat-joke-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: قول شيء يضحك عن التسويف.
+          topic_id: chat-joke
+      chat-company-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: بس أبي أحد يسمع سوالفي.
+          topic_id: chat-company
+      chat-company-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: ما عندي موضوع، افتح سالفة.
+          topic_id: chat-company
+      chat-plans-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: عندي ساعة فاضية وش أسوي؟
+          topic_id: chat-plans
+      chat-plans-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: ودي أغير جو بالبيت.
+          topic_id: chat-plans
+      chat-little-frustration-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: القهوة انكبت على مكتبي.
+          topic_id: chat-little-frustration
+      chat-little-frustration-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: اليوم كل شيء يعاندني شوي.
+          topic_id: chat-little-frustration
+      chat-indecision-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: محتار أطلع ولا أجلس بالبيت.
+          topic_id: chat-indecision
+      chat-indecision-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: أبي أغير شيء بسيط بيومي.
+          topic_id: chat-indecision
+      chat-celebration-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: خلصت أول كتاب لي هالسنة.
+          topic_id: chat-celebration
+      chat-celebration-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: تعلمت أسوي أكلة جديدة اليوم.
+          topic_id: chat-celebration
+      chat-weather-mood-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: أحب ريحة المطر.
+          topic_id: chat-weather-mood
+      chat-weather-mood-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: الجو البارد يخليني أروق.
+          topic_id: chat-weather-mood
+      chat-food-opinions-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: أناناس على البيتزا، مع أو ضد؟
+          topic_id: chat-food-opinions
+      chat-food-opinions-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: وش أغرب خلطة أكل تتخيلها؟
+          topic_id: chat-food-opinions
+      chat-mini-game-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: العب معي لعبة تخمين.
+          topic_id: chat-mini-game
+      chat-mini-game-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: خلنا نلعب كلمات بدون تعقيد.
+          topic_id: chat-mini-game
+      chat-correction-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: لا قصدي شيء ثاني، فهمتني غلط.
+          topic_id: chat-correction
+      chat-correction-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: مو هذا اللي كنت أقصده بالسؤال.
+          topic_id: chat-correction
+      chat-gratitude-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: شكرا، كذا فهمت.
+          topic_id: chat-gratitude
+      chat-gratitude-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: كفو، هذا اللي كنت أبيه.
+          topic_id: chat-gratitude
+      chat-opener-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: ياخي عندي سالفة.
+          topic_id: chat-opener
+      chat-opener-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: اسمع وش صار معي اليوم.
+          topic_id: chat-opener
+      chat-topic-change-1:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: خلنا نغير الموضوع.
+          topic_id: chat-topic-change
+      chat-topic-change-2:
+        request_type: casual_chat
+        depth: casual
+        source_ids: []
+        quality_policy:
+          min_answer_words: 5
+          require_markdown: false
+        cues:
+        - question: طيب بعيد عن هالسالفة، وش نتكلم عنه؟
+          topic_id: chat-topic-change
+  tourism:
+    weight: 16
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      travel-pace-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أخطط رحلة بدون ما أتعب من التنقل؟
+          topic_id: travel-pace
+      travel-pace-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ثلاث مدن بخمسة أيام كثير؟
+          topic_id: travel-pace
+      travel-packing-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش آخذ معي لرحلة يومين؟
+          topic_id: travel-packing
+      travel-packing-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أسافر بشنطة صغيرة بس؟
+          topic_id: travel-packing
+      travel-budget-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: معي 2000 للرحلة، كيف أقسمها؟
+          topic_id: travel-budget
+      travel-budget-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أحسب مصروف اليوم بالسفر؟
+          topic_id: travel-budget
+      travel-family-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أخطط يوم يناسب كبير وصغير؟
+          topic_id: travel-family
+      travel-family-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أخلي جدول الرحلة مرن للأطفال؟
+          topic_id: travel-family
+      travel-solo-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش أجهز لأول رحلة لحالي؟
+          topic_id: travel-solo
+      travel-solo-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أرتب يومي إذا سافرت لحالي؟
+          topic_id: travel-solo
+      travel-museums-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أستمتع بمتحف بدون ما أشوف كل شيء؟
+          topic_id: travel-museums
+      travel-museums-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين جولة مرشد وزيارة لحالي؟
+          topic_id: travel-museums
+      travel-nature-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش يختلف تجهيز رحلة طبيعة عن مدينة؟
+          topic_id: travel-nature
+      travel-nature-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أرتب يوم فيه مشي ووقت راحة؟
+          topic_id: travel-nature
+      travel-language-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أطلب الاتجاهات إذا ما أعرف اللغة؟
+          topic_id: travel-language
+      travel-language-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني جملة أسأل فيها عن محطة القطار.
+          topic_id: travel-language
+  everyday_life:
+    weight: 20
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      daily-priorities-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي ثلاث شغلات وما أدري أبدأ بأي وحدة.
+          topic_id: daily-priorities
+      daily-priorities-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أرتب يومي بدون جدول معقد؟
+          topic_id: daily-priorities
+      simple-budget-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: معي 500 للأسبوع، كيف أقسمها؟
+          topic_id: simple-budget
+      simple-budget-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أحسب مصروف كل يوم؟
+          topic_id: simple-budget
+      shopping-list-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أرتب قائمة المقاضي؟
+          topic_id: shopping-list
+      shopping-list-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أشتري أشياء عندي بالبيت، كيف أتجنبها؟
+          topic_id: shopping-list
+      decision-comparison-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي خيارين، كيف أرتب المقارنة بينهم؟
+          topic_id: decision-comparison
+      decision-comparison-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أفرق بين شيء أبيه وشيء أحتاجه؟
+          topic_id: decision-comparison
+      appointment-planning-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي موعدين بنفس اليوم، كيف أنظمهم؟
+          topic_id: appointment-planning
+      appointment-planning-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أحسب وقت المشوار مع وقت الانتظار؟
+          topic_id: appointment-planning
+      moving-checklist-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: بنقل شقة، من وين أبدأ؟
+          topic_id: moving-checklist
+      moving-checklist-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أقسم تجهيز النقل على أسبوع؟
+          topic_id: moving-checklist
+      digital-declutter-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ملفاتي مبعثرة، كيف أرتبها؟
+          topic_id: digital-declutter
+      digital-declutter-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أختار أسماء ملفات أفهمها بعدين؟
+          topic_id: digital-declutter
+      gift-ideas-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أبي هدية بسيطة لأخوي يحب الرسم.
+          topic_id: gift-ideas
+      gift-ideas-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش هدية شخصية بدون تكلفة كبيرة؟
+          topic_id: gift-ideas
+      event-planning-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي جمعة صغيرة، كيف أرتبها؟
+          topic_id: event-planning
+      event-planning-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أجهز عزيمة بدون ضغط آخر ساعة؟
+          topic_id: event-planning
+      errand-grouping-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي خمس مشاوير، كيف أرتبها؟
+          topic_id: errand-grouping
+      errand-grouping-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أجمع المشاوير عشان ما أرجع لنفس المكان؟
+          topic_id: errand-grouping
+  home:
+    weight: 20
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      desk-organization-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أرتب مكتبي الصغير؟
+          topic_id: desk-organization
+      desk-organization-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش أخلي قدامي ووش أخزنه؟
+          topic_id: desk-organization
+      closet-sorting-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: دولابي مزحوم، كيف أبدأ أرتبه؟
+          topic_id: closet-sorting
+      closet-sorting-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أفرز الملابس اللي ما أستخدمها؟
+          topic_id: closet-sorting
+      small-room-layout-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أستغل غرفة صغيرة؟
+          topic_id: small-room-layout
+      small-room-layout-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش أقيس قبل ما أغير ترتيب الغرفة؟
+          topic_id: small-room-layout
+      cleaning-schedule-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أقسم تنظيف البيت على الأسبوع؟
+          topic_id: cleaning-schedule
+      cleaning-schedule-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي عشرين دقيقة، وش أنظف أول؟
+          topic_id: cleaning-schedule
+      kitchen-organization-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أرتب مطبخ صغير؟
+          topic_id: kitchen-organization
+      kitchen-organization-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وين أحط الأشياء اللي أستخدمها يوميًا؟
+          topic_id: kitchen-organization
+      cable-management-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: الأسلاك تحت المكتب متشابكة، كيف أرتبها؟
+          topic_id: cable-management
+      cable-management-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أميز كل سلك بدون ما أفصله كل مرة؟
+          topic_id: cable-management
+      shared-space-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف نتفق على ترتيب المساحة المشتركة؟
+          topic_id: shared-space
+      shared-space-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أقسم شغل البيت بطريقة واضحة؟
+          topic_id: shared-space
+      paperwork-sorting-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أرتب الفواتير والأوراق؟
+          topic_id: paperwork-sorting
+      paperwork-sorting-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش نظام بسيط عشان ألقى المستند بسرعة؟
+          topic_id: paperwork-sorting
+      declutter-decisions-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كل شيء أحس يمكن أحتاجه، كيف أفرز؟
+          topic_id: declutter-decisions
+      declutter-decisions-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أرتب درج مليان أشياء مختلفة؟
+          topic_id: declutter-decisions
+      room-lighting-plan-1:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أخلي زاوية القراءة مريحة؟
+          topic_id: room-lighting-plan
+      room-lighting-plan-2:
+        request_type: planning
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين إضاءة عامة وإضاءة للمكتب؟
+          topic_id: room-lighting-plan
+  study_skills:
+    weight: 20
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      revision-plan-1:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اختباري بعد أسبوع، كيف أقسم المذاكرة؟
+          topic_id: revision-plan
+      revision-plan-2:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي مادتين، كيف أوزع وقتي؟
+          topic_id: revision-plan
+      practice-questions-1:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أحول الدرس لأسئلة أتدرب عليها؟
+          topic_id: practice-questions
+      practice-questions-2:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: سو لي اختبار قصير عن الكسور.
+          topic_id: practice-questions
+      study-errors-1:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: طلعت إجابتي غلط، كيف أعرف وين أخطأت؟
+          topic_id: study-errors
+      study-errors-2:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أراجع حل مسألة خطوة خطوة؟
+          topic_id: study-errors
+      note-taking-1:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أكتب ملاحظات بدون نسخ الدرس؟
+          topic_id: note-taking
+      note-taking-2:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين ملخص وقائمة نقاط؟
+          topic_id: note-taking
+      reading-strategy-1:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أقرأ الصفحة وما أعرف أهم فكرة.
+          topic_id: reading-strategy
+      reading-strategy-2:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أطلع الفكرة الرئيسية من فقرة؟
+          topic_id: reading-strategy
+      essay-outline-1:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أرتب موضوع تعبير عن التعاون؟
+          topic_id: essay-outline
+      essay-outline-2:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني بداية ونقاط لموضوع عن القراءة.
+          topic_id: essay-outline
+      concept-map-1:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أربط أفكار الدرس ببعض؟
+          topic_id: concept-map
+      concept-map-2:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش أحط في خريطة مفاهيم بسيطة؟
+          topic_id: concept-map
+      presentation-practice-1:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي عرض خمس دقايق، كيف أرتبه؟
+          topic_id: presentation-practice
+      presentation-practice-2:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أشرح فكرة بدون ما أقرأ من الشريحة؟
+          topic_id: presentation-practice
+      learning-by-example-1:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اشرح لي مثال وبعدين خلني أجرب.
+          topic_id: learning-by-example
+      learning-by-example-2:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: لا تعطيني الحل كله، أعطني أول خطوة.
+          topic_id: learning-by-example
+      study-tradeoffs-1:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أعيد القراءة ولا أحل تمارين؟
+          topic_id: study-tradeoffs
+      study-tradeoffs-2:
+        request_type: teaching
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أعرف أي جزء أحتاج أراجعه أكثر؟
+          topic_id: study-tradeoffs
+  work:
+    weight: 20
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      meeting-agenda-1:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي اجتماع نصف ساعة، كيف أرتبه؟
+          topic_id: meeting-agenda
+      meeting-agenda-2:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أكتب جدول اجتماع واضح؟
+          topic_id: meeting-agenda
+      meeting-notes-1:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أفرق بين قرار وملاحظة بمحضر الاجتماع؟
+          topic_id: meeting-notes
+      meeting-notes-2:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'رتب لي: نراجع السعر، خالد يرسل العرض، نلتقي الأحد.'
+          topic_id: meeting-notes
+      work-status-1:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أكتب تحديث قصير عن شغلي؟
+          topic_id: work-status
+      work-status-2:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش أذكر إذا المهمة لسه ما خلصت؟
+          topic_id: work-status
+      deadline-message-1:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أطلب تمديد موعد تسليم؟
+          topic_id: deadline-message
+      deadline-message-2:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب رسالة أبلغهم فيها بتأخير يوم.
+          topic_id: deadline-message
+      handover-checklist-1:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: بسلم شغلي لزميل، وش أوضح له؟
+          topic_id: handover-checklist
+      handover-checklist-2:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أكتب خطوات مهمة عشان غيري يكملها؟
+          topic_id: handover-checklist
+      feedback-wording-1:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أعطي ملاحظة لزميل بدون تجريح؟
+          topic_id: feedback-wording
+      feedback-wording-2:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: خل جملة شغلك ناقص أكثر وضوحًا واحترامًا.
+          topic_id: feedback-wording
+      customer-reply-1:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أرد على عميل يسأل عن طلبه؟
+          topic_id: customer-reply
+      customer-reply-2:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب رد مهذب يقول نحتاج رقم الطلب.
+          topic_id: customer-reply
+      project-breakdown-1:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي مشروع صغير، كيف أقسمه؟
+          topic_id: project-breakdown
+      project-breakdown-2:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أعرف وش لازم يخلص قبل المهمة الثانية؟
+          topic_id: project-breakdown
+      work-boundaries-1:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أوضح إن عندي مهام كثيرة؟
+          topic_id: work-boundaries
+      work-boundaries-2:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أطلب منهم يحددون الأولوية؟
+          topic_id: work-boundaries
+      interview-practice-1:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: تدرب معي على سؤال عرفنا بنفسك.
+          topic_id: interview-practice
+      interview-practice-2:
+        request_type: practical_assistance
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أشرح خبرتي بدون مبالغة؟
+          topic_id: interview-practice
+  writing:
+    weight: 20
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      rewrite-clear-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'وضح هالجملة: الموضوع له علاقة بالشيء اللي قلناه.'
+          topic_id: rewrite-clear
+      rewrite-clear-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: خل كلامي أقصر بدون ما تغير المعنى.
+          topic_id: rewrite-clear
+      tone-change-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'خل هالرسالة ألطف: ليه ما رديت؟'
+          topic_id: tone-change
+      tone-change-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: حول تم إلى رد رسمي قصير.
+          topic_id: tone-change
+      summarize-supplied-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'لخص: تأخر القطار عشر دقائق ووصل الركاب قبل الظهر.'
+          topic_id: summarize-supplied
+      summarize-supplied-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'اختصر: زرنا المتحف ثم مشينا للسوق وتغدينا هناك.'
+          topic_id: summarize-supplied
+      invitation-draft-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب دعوة بسيطة لقهوة عندي الجمعة.
+          topic_id: invitation-draft
+      invitation-draft-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أدعو شخص بدون ما أضغط عليه؟
+          topic_id: invitation-draft
+      apology-draft-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب اعتذار بسيط عن تأخر الرد.
+          topic_id: apology-draft
+      apology-draft-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أعتذر بدون أعذار طويلة؟
+          topic_id: apology-draft
+      thank-you-note-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب شكر لمعلم ساعدني.
+          topic_id: thank-you-note
+      thank-you-note-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أبي رسالة شكر قصيرة مو رسمية بزيادة.
+          topic_id: thank-you-note
+      announcement-draft-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب إعلان عن بيع مكتب مستعمل.
+          topic_id: announcement-draft
+      announcement-draft-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أوضح حالة الغرض بدون مبالغة؟
+          topic_id: announcement-draft
+      story-dialogue-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب حوار بين أخوين ضيعوا المفتاح.
+          topic_id: story-dialogue
+      story-dialogue-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: خل الحوار طبيعي وبلهجة سعودية.
+          topic_id: story-dialogue
+      sentence-editing-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'صحح: ذهبت الا المدرسه مبكرا.'
+          topic_id: sentence-editing
+      sentence-editing-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'حط ترقيم: وين الكتاب قلت له فوق المكتب.'
+          topic_id: sentence-editing
+      title-brainstorm-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني عنوان لمقال عن التسويف.
+          topic_id: title-brainstorm
+      title-brainstorm-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أبي اسم خفيف لنادي قراءة صغير.
+          topic_id: title-brainstorm
+  programming:
+    weight: 20
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      python-loops-1:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اشرح حلقة for بمثال بسيط.
+          topic_id: python-loops
+      python-loops-2:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب كود يطبع الأعداد من 1 إلى 5.
+          topic_id: python-loops
+      python-functions-1:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين print وreturn؟
+          topic_id: python-functions
+      python-functions-2:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: سو دالة تجمع رقمين واشرحها.
+          topic_id: python-functions
+      python-lists-1:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أضيف عنصر لقائمة بايثون؟
+          topic_id: python-lists
+      python-lists-2:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أطلع أكبر رقم من قائمة؟
+          topic_id: python-lists
+      python-dictionaries-1:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين القائمة والقاموس ببايثون؟
+          topic_id: python-dictionaries
+      python-dictionaries-2:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أخزن اسم شخص وعمره؟
+          topic_id: python-dictionaries
+      python-debugging-1:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليش print(10 / 0) يعطي خطأ؟
+          topic_id: python-debugging
+      python-debugging-2:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'صحح: for i in range(3) print(i)'
+          topic_id: python-debugging
+      javascript-basics-1:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين let وconst؟
+          topic_id: javascript-basics
+      javascript-basics-2:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليش 2 == '2' تختلف عن 2 === '2'؟
+          topic_id: javascript-basics
+      html-css-task-1:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: سو زر بسيط بلون أزرق.
+          topic_id: html-css-task
+      html-css-task-2:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين class وid في هالمثال؟
+          topic_id: html-css-task
+      sql-query-task-1:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب استعلام يطلع الموظفين راتبهم فوق 5000.
+          topic_id: sql-query-task
+      sql-query-task-2:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أرتب نتائج SQL من الأكبر للأصغر؟
+          topic_id: sql-query-task
+      algorithm-tracing-1:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أبحث عن رقم بقائمة مرتبة؟
+          topic_id: algorithm-tracing
+      algorithm-tracing-2:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اشرح البحث الثنائي على ثمانية أرقام.
+          topic_id: algorithm-tracing
+      code-test-cases-1:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أختبر دالة تجمع رقمين؟
+          topic_id: code-test-cases
+      code-test-cases-2:
+        request_type: coding
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش حالة اختبار تكشف خطأ عند قائمة فاضية؟
+          topic_id: code-test-cases
+  reasoning:
+    weight: 20
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      percentage-change-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: سعره 200 وعليه خصم 15٪، كم يصير؟
+          topic_id: percentage-change
+      percentage-change-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: إذا زاد 10٪ ثم نقص 10٪ يرجع مثل أول؟
+          topic_id: percentage-change
+      ratio-sharing-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: قسم 120 بنسبة 1 إلى 2.
+          topic_id: ratio-sharing
+      ratio-sharing-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين النسبة والكسر بهالمثال؟
+          topic_id: ratio-sharing
+      time-arithmetic-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: بدأنا 9:45 وانتهينا 11:10، كم المدة؟
+          topic_id: time-arithmetic
+      time-arithmetic-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: رحلة ساعتين ونصف تبدأ 6:20، متى توصل؟
+          topic_id: time-arithmetic
+      table-reasoning-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: مبيعات السبت 5 والأحد 8، كم الفرق؟
+          topic_id: table-reasoning
+      table-reasoning-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي ثلاث قيم 10 و15 و20، وش مجموعها؟
+          topic_id: table-reasoning
+      constraint-puzzle-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي صندوقان وتسع كرات، كيف أخلي واحد أكثر بثلاث؟
+          topic_id: constraint-puzzle
+      constraint-puzzle-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عدد بين 10 و20 يقبل القسمة على 3 و5، وش هو؟
+          topic_id: constraint-puzzle
+      estimation-sanity-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أعرف إذا ناتج الحساب منطقي؟
+          topic_id: estimation-sanity
+      estimation-sanity-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 120 مقسومة على 4 طلعت 300، وين المشكلة؟
+          topic_id: estimation-sanity
+      unit-consistency-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليه ما أجمع متر مع سنتيمتر مباشرة؟
+          topic_id: unit-consistency
+      unit-consistency-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أتأكد وحدات مسألة السرعة متوافقة؟
+          topic_id: unit-consistency
+      correlation-causation-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: هل شيئين يزيدون مع بعض يعني واحد سبب الثاني؟
+          topic_id: correlation-causation
+      correlation-causation-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني مثال يوضح الفرق بين ارتباط وسبب.
+          topic_id: correlation-causation
+      argument-premises-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أفرق بين رأي وحجة؟
+          topic_id: argument-premises
+      argument-premises-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'حدد النتيجة: كل مربع مستطيل، وهذا مربع، إذن هذا مستطيل.'
+          topic_id: argument-premises
+      missing-information-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: سيارة قطعت 100 كيلو، كم كانت سرعتها؟
+          topic_id: missing-information
+      missing-information-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عندي مستطيل طوله 8، كم مساحته؟
+          topic_id: missing-information
+  creative:
+    weight: 20
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      microfiction-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب قصة قصيرة عن مفتاح غريب.
+          topic_id: microfiction
+      microfiction-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أبي نهاية مفاجئة لقصة ضاع فيها الجوال.
+          topic_id: microfiction
+      bedtime-story-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: احك لطفلي قصة عن سلحفاة تستعجل.
+          topic_id: bedtime-story
+      bedtime-story-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: خل القصة هادية قبل النوم.
+          topic_id: bedtime-story
+      character-building-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اخترع شخصية تخاف الماء وتحب البحر.
+          topic_id: character-building
+      character-building-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أخلي شخصيتي لها هدف واضح؟
+          topic_id: character-building
+      alternate-endings-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ولد لقى رسالة باسمه، عطني نهايتين.
+          topic_id: alternate-endings
+      alternate-endings-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أبي نهاية سعيدة ونهاية مضحكة لنفس الفكرة.
+          topic_id: alternate-endings
+      world-building-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: تخيل مدينة ما يطلع فيها صوت.
+          topic_id: world-building
+      world-building-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف يعيش الناس بعالم الليل فيه أسبوع؟
+          topic_id: world-building
+      creative-prompts-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني فكرة رسم من ثلاثة أشياء بسيطة.
+          topic_id: creative-prompts
+      creative-prompts-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أبي بداية قصة أكملها بنفسي.
+          topic_id: creative-prompts
+      original-riddles-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني لغز بسيط وحله مخفي بالنهاية.
+          topic_id: original-riddles
+      original-riddles-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: سو لغز يعتمد على الحساب مو الخدعة.
+          topic_id: original-riddles
+      game-night-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اخترع لعبة كلام لثلاثة أشخاص.
+          topic_id: game-night
+      game-night-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أبي لعبة تجمعنا بدون جوالات.
+          topic_id: game-night
+      personal-poem-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب بيتين عن رجعة صديق.
+          topic_id: personal-poem
+      personal-poem-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أبي كلام بسيط عن صباح هادي.
+          topic_id: personal-poem
+      creative-revision-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'طور: دخل البيت ولقى شيء غريب.'
+          topic_id: creative-revision
+      creative-revision-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أخلي وصف الغرفة يوحي بالغموض؟
+          topic_id: creative-revision
+  poetry_writing:
+    weight: 40
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      poem-classical-diction-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب أربعة أسطر شعرية فصيحة عن المطر.
+          topic_id: poem-classical-diction
+      poem-classical-diction-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أبي شعر عن الصداقة بلغة قديمة وواضحة.
+          topic_id: poem-classical-diction
+      poem-modern-free-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب قصيدة حرة قصيرة عن بداية جديدة.
+          topic_id: poem-modern-free
+      poem-modern-free-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أبي شعر حديث عن مدينة وقت الفجر.
+          topic_id: poem-modern-free
+      poem-nabati-original-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب لي شعر عامي عن رجعة غايب.
+          topic_id: poem-nabati-original
+      poem-nabati-original-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أبي أبيات بسيطة عن فنجال قهوة.
+          topic_id: poem-nabati-original
+      poem-child-original-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب شعر سهل لطفلي عن النجوم.
+          topic_id: poem-child-original
+      poem-child-original-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: خل الشعر عن المدرسة وقافيته واضحة.
+          topic_id: poem-child-original
+      poem-occasion-original-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب بيتين تهنئة بالتخرج.
+          topic_id: poem-occasion-original
+      poem-occasion-original-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أبي شعر قصير أشكر فيه معلمي.
+          topic_id: poem-occasion-original
+      poem-longing-original-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب شعر عن الشوق بدون مبالغة.
+          topic_id: poem-longing-original
+      poem-longing-original-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: خل الحنين يبان بصورة بدل كلمة اشتقت.
+          topic_id: poem-longing-original
+      poem-nature-original-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: صف البحر بأربعة أسطر شعرية.
+          topic_id: poem-nature-original
+      poem-nature-original-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب شعر عن نخلة بعد المطر.
+          topic_id: poem-nature-original
+      poem-humor-original-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: اكتب شعر مضحك عن واحد ينسى مفاتيحه.
+          topic_id: poem-humor-original
+      poem-humor-original-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: أبي شعر خفيف عن المنبه والنوم.
+          topic_id: poem-humor-original
+      poem-rhyme-revision-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'عدّل: عاد الصديق فصار يومي أجمل، وخف الحزن عن قلبي.'
+          topic_id: poem-rhyme-revision
+      poem-rhyme-revision-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: خل نهاية السطرين تتشابه بدون تكلف.
+          topic_id: poem-rhyme-revision
+      poem-image-revision-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'طور الصورة: الحزن مثل غرفة مقفلة.'
+          topic_id: poem-image-revision
+      poem-image-revision-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: بدّل وصف القلب المكسور بصورة جديدة.
+          topic_id: poem-image-revision
+      poem-register-rewrite-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'حول: فرحت يوم شفت صاحبي، لصياغة شعرية فصيحة.'
+          topic_id: poem-register-rewrite
+      poem-register-rewrite-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'خل: أشتاق لصوتك، شعر عامي بسيط.'
+          topic_id: poem-register-rewrite
+      poem-meaning-original-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'وش معنى: خبأت صوتك في زوايا الذاكرة؟'
+          topic_id: poem-meaning-original
+      poem-meaning-original-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'اشرح: يفتح الصباح نافذة في قلبي.'
+          topic_id: poem-meaning-original
+      poem-metaphor-original-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'وش الصورة في: المدينة ترتدي ضوءها؟'
+          topic_id: poem-metaphor-original
+      poem-metaphor-original-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'ليش نقول: نام الطريق تحت الغبار؟'
+          topic_id: poem-metaphor-original
+      poem-emotion-original-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'وش الشعور في: مر الكرسي فارغًا في ذاكرتي؟'
+          topic_id: poem-emotion-original
+      poem-emotion-original-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'هل: أزرع غدًا في كفي، يوحي بالأمل؟'
+          topic_id: poem-emotion-original
+      poem-compare-original-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'قارن: الليل بحر، والليل عباءة.'
+          topic_id: poem-compare-original
+      poem-compare-original-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'وش الفرق بين: الباب ينتظر، والباب مغلق؟'
+          topic_id: poem-compare-original
+      poem-paraphrase-original-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'بسّط: يحمل المساء خطانا إلى الصمت.'
+          topic_id: poem-paraphrase-original
+      poem-paraphrase-original-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'اشرح لطفلي: ضحكت الحديقة بعد المطر.'
+          topic_id: poem-paraphrase-original
+      poem-complete-original-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'كمل: على نافذتي نام ضوء المساء.'
+          topic_id: poem-complete-original
+      poem-complete-original-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أضف سطرين بعد: أبحث عن صوتي بين الطرقات.'
+          topic_id: poem-complete-original
+      poem-feedback-original-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'قيّم: صباح جديد، وقلبي سعيد، وطريقي بعيد.'
+          topic_id: poem-feedback-original
+      poem-feedback-original-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'وش أحسن في: المطر جميل، والجو جميل؟'
+          topic_id: poem-feedback-original
+      poem-teach-writing-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أكتب أول سطر شعر بدون ما أتكلف؟
+          topic_id: poem-teach-writing
+      poem-teach-writing-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني تمرين أتعلم فيه الصور الشعرية.
+          topic_id: poem-teach-writing
+      poem-no-false-attribution-1:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'اشرح: في جيب الريح رسالة لا تصل.'
+          topic_id: poem-no-false-attribution
+      poem-no-false-attribution-2:
+        request_type: drafting
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'مين قال: ينام الضوء على كتف المدينة؟'
+          topic_id: poem-no-false-attribution
+  arabic_grammar:
+    weight: 40
+    profile: practical
+    grounding_mode: task
+    subdomains:
+      grammar-nominal-verbal-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'حدد نوع الجملة: الطالب مجتهد.'
+          topic_id: grammar-nominal-verbal
+      grammar-nominal-verbal-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'وش الفرق بين: حضر الطالب، والطالب حاضر؟'
+          topic_id: grammar-nominal-verbal
+      grammar-subject-predicate-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: الجو جميل.'
+          topic_id: grammar-subject-predicate
+      grammar-subject-predicate-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'وين المبتدأ والخبر في: الكتاب على الطاولة؟'
+          topic_id: grammar-subject-predicate
+      grammar-verb-agent-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: كتب الطالب الدرس.'
+          topic_id: grammar-verb-agent
+      grammar-verb-agent-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'حدد الفاعل في: وصلت الحافلة مبكرًا.'
+          topic_id: grammar-verb-agent
+      grammar-object-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب كلمة الكتاب في: قرأت الكتاب.'
+          topic_id: grammar-object
+      grammar-object-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'استخرج المفعول به: رسم الطفل شجرة.'
+          topic_id: grammar-object
+      grammar-passive-agent-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'حول: كتب الطالب الرسالة، للمجهول.'
+          topic_id: grammar-passive-agent
+      grammar-passive-agent-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: كُسِرَ الزجاجُ.'
+          topic_id: grammar-passive-agent
+      grammar-kana-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: كان الطريق طويلًا.'
+          topic_id: grammar-kana
+      grammar-kana-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'صحح: أصبح الطالب مجتهدٌ.'
+          topic_id: grammar-kana
+      grammar-inna-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: إن العلم نور.'
+          topic_id: grammar-inna
+      grammar-inna-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'صحح: لعل الطالبَ ناجحًا.'
+          topic_id: grammar-inna
+      grammar-prepositions-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: ذهبت إلى المدرسة.'
+          topic_id: grammar-prepositions
+      grammar-prepositions-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'ليش كلمة البيت مجرورة في: مررت بالبيت؟'
+          topic_id: grammar-prepositions
+      grammar-idafa-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: باب المدرسة مفتوح.'
+          topic_id: grammar-idafa
+      grammar-idafa-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'وش المضاف إليه في: دفتر الطالب جديد؟'
+          topic_id: grammar-idafa
+      grammar-adjective-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'حدد النعت: قرأت قصة ممتعة.'
+          topic_id: grammar-adjective
+      grammar-adjective-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'صحح: هذه طالبة مجتهد.'
+          topic_id: grammar-adjective
+      grammar-conjunction-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: حضر خالد وسالم.'
+          topic_id: grammar-conjunction
+      grammar-conjunction-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'وش المعطوف في: اشتريت قلمًا ودفترًا؟'
+          topic_id: grammar-conjunction
+      grammar-dual-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: حضر طالبان.'
+          topic_id: grammar-dual
+      grammar-dual-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'صحح: سلمت على طالبان.'
+          topic_id: grammar-dual
+      grammar-sound-masculine-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: نجح المعلمون.'
+          topic_id: grammar-sound-masculine
+      grammar-sound-masculine-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'صحح: شكرت المعلمون.'
+          topic_id: grammar-sound-masculine
+      grammar-sound-feminine-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: كرمت المعلماتِ.'
+          topic_id: grammar-sound-feminine
+      grammar-sound-feminine-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: ليش نصب جمع المؤنث السالم بالكسرة هنا؟
+          topic_id: grammar-sound-feminine
+      grammar-five-nouns-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: جاء أبوك.'
+          topic_id: grammar-five-nouns
+      grammar-five-nouns-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'صحح: مررت بأبوك.'
+          topic_id: grammar-five-nouns
+      grammar-present-mood-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: لن أهمل درسي.'
+          topic_id: grammar-present-mood
+      grammar-present-mood-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'وش الفرق بين: لم يكتب، ولن يكتب؟'
+          topic_id: grammar-present-mood
+      grammar-five-verbs-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: الطالبان يكتبان.'
+          topic_id: grammar-five-verbs
+      grammar-five-verbs-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'صحح: لم يكتبون الواجب.'
+          topic_id: grammar-five-verbs
+      grammar-hal-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'أعرب: عاد الطفل مسرورًا.'
+          topic_id: grammar-hal
+      grammar-hal-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: وش الفرق بين الحال والنعت في مثال بسيط؟
+          topic_id: grammar-hal
+      grammar-number-agreement-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'صحح: عندي ثلاثة طالبات.'
+          topic_id: grammar-number-agreement
+      grammar-number-agreement-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: كيف أكتب العدد 5 مع كلمة كتب؟
+          topic_id: grammar-number-agreement
+      grammar-hints-homework-1:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: 'ساعدني أعرب: فتح الحارس الباب، بتلميح أول.'
+          topic_id: grammar-hints-homework
+      grammar-hints-homework-2:
+        request_type: worked_solution
+        depth: developed
+        source_ids: []
+        quality_policy:
+          min_answer_words: 50
+        cues:
+        - question: عطني سؤال عن إن وأخواتها ثم صحح حلي.
+          topic_id: grammar-hints-homework

@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "purpose": "Original authored style examples calibrated to short-question/medium-answer patterns; not copied LMSYS answers or factual evidence.",
+  "mix_origins": [
+    "authored"
+  ],
+  "reference_access": {
+    "bucket": "https://huggingface.co/buckets/Mohaddz/lmsys-chat-1m-bucket",
+    "method": "Public HTTP ranges; inspected first Parquet row group on VM",
+    "checked_on": "2026-10-01"
+  },
+  "references": [
+    {
+      "id": "v2-authored-0",
+      "origin": "authored",
+      "domain": "تعليم",
+      "request_type": "comparison",
+      "user": "وش الفرق بين التلخيص وإعادة الصياغة؟",
+      "assistant": "الفرق الأساسي هو **وش تغيّر في النص**: التلخيص يقلل التفاصيل ويحتفظ بالأفكار المهمة، أما إعادة الصياغة فتغيّر طريقة التعبير مع بقاء المعنى والمعلومات الأساسية.\n\n### التلخيص\nلو عندك صفحة تشرح رحلة مدرسية، تقدر تلخصها في فقرة فيها مكان الرحلة وهدفها وأبرز اللي تعلموه الطلاب. ما تحتاج تنقل كل موقف صار، لأن المطلوب هنا صورة مختصرة عن المحتوى.\n\n### إعادة الصياغة\nلو الجملة تقول: «ساهمت الرحلة في تنمية معرفة الطلاب بالتراث»، ممكن تكتب: «ساعدت الرحلة الطلاب على فهم تراثهم بشكل أفضل». الفكرة نفسها، لكن الكلمات وتركيب الجملة تغيرت.\n\n**مثال عملي:** إذا المعلم طلب ملخصًا، اختَر المهم واحذف التفاصيل الثانوية. وإذا طلب إعادة صياغة، حافظ على المعلومات وأعد كتابتها بأسلوبك. تغيير كلمتين فقط ما يكفي إذا بقية النص منسوخة كما هي.\n\nوتقدر تتأكد من شغلك بسؤال بسيط: هل اختصرت المحتوى، أو قلت المحتوى نفسه بطريقة جديدة؟",
+      "earlier_user_messages": [],
+      "demonstrates": [
+        "short_direct_user",
+        "developed_answer",
+        "useful_markdown"
+      ],
+      "review_status": "agent_style_reviewed",
+      "review_note": "Original demonstration of answer shape; no external factual claims used as evidence.",
+      "role": "style_only_not_factual_evidence"
+    },
+    {
+      "id": "v2-authored-1",
+      "origin": "authored",
+      "domain": "homework",
+      "request_type": "worked_solution",
+      "user": "اشرح 4س - 6 = 10.",
+      "assistant": "قيمة **س = 4**. نطلعها بعزل س، يعني نخليها لحالها في طرف المعادلة.\n\n### 1. نتخلص من ناقص 6\nنضيف 6 للطرفين، مو لطرف واحد فقط، عشان تظل المعادلة متوازنة:\n\n`4س - 6 + 6 = 10 + 6`\n\nفتصير: `4س = 16`.\n\n### 2. نتخلص من الضرب في 4\nس مضروبة في 4، فنقسم الطرفين على 4:\n\n`س = 16 ÷ 4 = 4`.\n\n### 3. نتحقق من الحل\nنعوّض س بـ4 في المعادلة الأصلية: `4 × 4 - 6 = 16 - 6 = 10`. الطرف الأيسر طلع 10، مثل الطرف الأيمن، فالحل صحيح.\n\nالفكرة اللي تساعدك في أي معادلة مشابهة: **اعكس العمليات بالترتيب المناسب، وسوِّ العملية نفسها للطرفين**. هنا عكسنا الطرح بالجمع، وبعدها عكسنا الضرب بالقسمة. التحقق في النهاية يكشف لك أي غلطة في الحساب.",
+      "earlier_user_messages": [],
+      "demonstrates": [
+        "short_direct_user",
+        "developed_answer",
+        "useful_markdown"
+      ],
+      "review_status": "agent_style_reviewed",
+      "review_note": "Original demonstration of answer shape; no external factual claims used as evidence.",
+      "role": "style_only_not_factual_evidence"
+    },
+    {
+      "id": "v2-authored-2",
+      "origin": "authored",
+      "domain": "teach_child",
+      "request_type": "teaching",
+      "user": "كيف أوضح لطفلي معنى العدد الزوجي؟",
+      "assistant": "ابدأ بشي يقدر يمسكه ويرتبه، بدل ما تبدأ بتعريف يحفظه. **العدد الزوجي نقدر نقسم عناصره إلى أزواج من غير ما يبقى عنصر لحاله.**\n\n### جربها بأغطية أو مكعبات\nحط 8 قطع قدامه، وقل: «خل كل قطعة معها صديقة». خلّه يرتبها مجموعات، كل مجموعة فيها قطعتان. بيطلع عنده أربعة أزواج، وما بقيت قطعة، إذن 8 عدد زوجي.\n\nبعدها زود قطعة واحدة. صار العدد 9، ولما يسوي الأزواج بتبقى قطعة لحالها. هنا تقول: «هذا نسميه عددًا فرديًا، لأن فيه قطعة ما لقت لها زوج».\n\n### خله يكتشف بنفسه\nأعطه 6 قطع ثم 7 قطع، واطلب منه يكوّن الأزواج في كل مرة. لا تعطِه الاسم قبل ما يجرب؛ اسأله هل بقيت قطعة، ثم خله يختار زوجي أو فردي.\n\nوفي النهاية اسأله: **«إذا عندنا 10 قطع، تتوقع تبقى وحدة؟ وكيف نتأكد؟»** كذا تعرف إذا فهم معنى الفكرة، مو بس حفظ أسماء أعداد معينة.",
+      "earlier_user_messages": [],
+      "demonstrates": [
+        "short_direct_user",
+        "developed_answer",
+        "useful_markdown"
+      ],
+      "review_status": "agent_style_reviewed",
+      "review_note": "Original demonstration of answer shape; no external factual claims used as evidence.",
+      "role": "style_only_not_factual_evidence"
+    }
+  ]
+}
