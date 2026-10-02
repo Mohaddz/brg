@@ -1,0 +1,17 @@
+[Unit]
+Description=BRG conversation explorer
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/brg/data_designer/explorer
+ExecStart=/usr/bin/python3 /root/brg/data_designer/explorer/server.py --host 127.0.0.1 --port 18766
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadOnlyPaths=/root/brg/data_designer
+
+[Install]
+WantedBy=multi-user.target
