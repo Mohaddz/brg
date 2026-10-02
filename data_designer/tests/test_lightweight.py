@@ -20,10 +20,23 @@ from lightweight import Requests, batch_checks, checks, conversation_schema, rev
 
 
 class LightweightTests(unittest.TestCase):
+    def test_instructional_conditionals_and_code_blocks_are_allowed(self):
+        row = dict(self.row(), grounding_mode='task')
+        messages = self.messages()
+        messages[1]['content'] = '**نصيحة** إذا تبي تتأكد من الناتج، شغل المثال وراجع القيم خطوة خطوة قبل ما تغيّر الشروط في البرنامج.'
+        messages[3]['content'] = '```python\n' + 'print(1)\n' * 22 + '```'
+        self.assertEqual(checks(row, messages, {'references': []}), [])
+
+    def test_complete_short_answers_are_not_rejected_for_word_quota(self):
+        row = dict(self.row(), grounding_mode='task')
+        messages = self.messages()
+        messages[1]['content'] = '**الجواب: ٤٢.**'
+        self.assertEqual(checks(row, messages, {'references': []}), [])
+
     def test_casual_style_exception_does_not_weaken_factual_checks(self):
         row = dict(self.row(), domain='chitchat', grounding_mode='task')
         messages = self.messages()
-        messages[1]['content'] = 'A short natural reply with enough words.'
+        messages[1]['content'] = 'A natural reply with enough useful words to explain the underlying idea and help someone understand the example without any formatting at all.'
         messages[3]['content'] = 'Another friendly reply without forced formatting here.'
         self.assertEqual(checks(row, messages, {'references': []}), [])
         row['domain'] = 'science'
@@ -183,9 +196,9 @@ class LightweightTests(unittest.TestCase):
         row["grounding_mode"] = "task"
         self.assertEqual(checks(row, messages, {"references": []}), [])
         messages[1]["content"] += "extra"
-        self.assertIn("15-1000 word bounds (1001)", " ".join(checks(row, messages, {"references": []})))
+        self.assertIn("exceeds 1000 word cap (1001)", " ".join(checks(row, messages, {"references": []})))
         row["quality_policy"] = {"max_answer_words": 240}
-        self.assertIn("15-240 word bounds", " ".join(checks(row, messages, {"references": []})))
+        self.assertIn("exceeds 240 word cap", " ".join(checks(row, messages, {"references": []})))
 
     def test_ten_generation_workers_keep_seed_order(self):
         barrier = threading.Barrier(10)

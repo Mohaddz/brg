@@ -32,7 +32,7 @@ from pathlib import Path
 
 from common import atomic_json, digest, load_inputs, ngrams, normalized_question, planned_rows
 
-VERSION = 2
+VERSION = 3
 MAX_ANSWER_WORDS = 1000
 TOKENS_PER_EXCHANGE = 5000
 WRITER = f"""Write a complete, realistic Saudi Arabic conversation in one response.
@@ -54,8 +54,9 @@ QUALITY CONTRACT:
   but a complete worked explanation may need more. Never pad to meet a quota.
   Maximum {MAX_ANSWER_WORDS} words. Avoid repeatedly restating earlier answers and templates.
   These are FINAL answers at the enhanced-answer quality level, not drafts.
-  Every answer must have meaningful Markdown, usually bold for the main fact,
-  or numbered worked steps. Plain paragraphs with only source links don't count.
+  Use meaningful Markdown for explanations, worked steps and code. A short draft,
+  translation, factual reply, poetic line or conversational acknowledgement can
+  be plain when formatting adds no value. Never pad to meet a minimum word count.
   Exception: chitchat usually needs 5-60 words and no forced Markdown. Be warm,
   playful or attentive without canned therapy or invented personal memories,
   lived experiences or claims to be human. Casual conversational questions are
@@ -76,8 +77,12 @@ QUALITY CONTRACT:
 - Homework: show correct reasoning and calculations. Teaching: concrete activity,
   age-neutral language, examples and a check of understanding; adapt subsequent
   explanations to the user's actual difficulty, not generic parenting advice.
-- All grounded claims, in any domain, must be supported by
-  the supplied checked facts. Cite 1-2 relevant Markdown source links near factual
+- When grounding_mode is grounded or researched, factual claims must be supported
+  by supplied reference notes. Research excerpts have model screening, not human verification.
+  When grounding_mode is general, answer stable ordinary knowledge carefully without
+  invented citations, exact historical dates, named-poet quotations, current claims,
+  medical/legal/financial recommendations or unverified person details.
+  Task examples may be hypothetical and explicitly framed as examples. Cite 1-2 relevant Markdown source links near factual
   claims, using only supplied URLs. Stay in their scope; avoid invented dates,
   motives and achievements. General hypothetical illustrations are allowed when
   clearly framed as examples. Do not ask questions the evidence cannot answer.
@@ -99,7 +104,11 @@ Compare the first answer with the provided current-pipeline answer to the SAME
 question: don't reward length alone. If no matched baseline is supplied, mark
 baseline_comparison similar and assess quality directly. Chitchat may be brief
 plain prose; don't demand Markdown or explanatory depth in casual conversation.
-Cite specific faulty message numbers and claims in issues.
+A complete short answer or draft can be acceptable with fewer than 15 words.
+Do not demand padding, forced Markdown on short replies or a citation for general
+knowledge/task examples. Distinguish instructional conditionals from closing offers.
+For general mode assess stable knowledge directly; for grounded/researched mode
+check the supplied evidence. Cite specific faulty message numbers and claims in issues.
 Put only concrete defects that require repair in issues, not
 optional suggestions or demands to add unrelated facts. Suggestions may go in
 reason. A clear narrow answer is acceptable without an extra paragraph. Cite
@@ -184,6 +193,16 @@ def plan(recipe_path):
     if type(cfg["repair_attempts"]) is not int or not 0 <= cfg["repair_attempts"] <= 2:
         raise ValueError("repair_attempts must be an integer between 0 and 2")
     root = recipe_path.parent
+    if cfg.get("seed_plan"):
+        rows = json.loads((root / cfg["seed_plan"]).read_text(encoding="utf-8"))
+        library = json.loads((ROOT / "references/hybrid_references_v2.json").read_text(encoding="utf-8"))
+        if len({normalized_question(r["first_question"]) for r in rows}) != len(rows):
+            raise ValueError("Duplicate starter in supplied seed plan")
+        for row in rows:
+            row["quality_policy"]["max_answer_words"] = MAX_ANSWER_WORDS
+            if not 1 <= row["max_exchanges"] <= 6:
+                raise ValueError("Invalid exchange count")
+        return cfg, rows, library
     base, library, sources = load_inputs(root / cfg["base_config"])
     seeds = planned_rows(base, library, sources)
     baseline = [json.loads(line) for line in (root / cfg["baseline"]).read_text().splitlines() if line.strip()]
@@ -253,18 +272,17 @@ def checks(row, messages, library):
             words = len(text.split())
             maximum = row.get("quality_policy", {}).get("max_answer_words", MAX_ANSWER_WORDS)
             casual = row.get('domain') == 'chitchat'
-            minimum = 5 if casual else 15
-            if words < minimum or words > maximum:
-                issues.append(f"Message {i+1}: answer outside {minimum}-{maximum} word bounds ({words})")
-            if not casual and not re.search(r"\*\*[^*]+\*\*|(?m:^#{1,3} |^[-*] |^\d+[.)] )", text):
+            minimum = 1
+            if words > maximum:
+                issues.append(f"Message {i+1}: answer exceeds {maximum} word cap ({words})")
+            if not casual and words > 20 and not re.search(r"\*\*[^*]+\*\*|(?m:^#{1,3} |^[-*] |^\d+[.)] |^```)", text):
                 issues.append(f"Message {i+1}: missing useful Markdown")
             links = re.findall(r"https?://[^\s)>\]]+", text)
             if any(url not in urls for url in links):
                 issues.append(f"Message {i+1}: citation outside approved URLs")
-            if row["grounding_mode"] == "grounded" and not links:
+            if row["grounding_mode"] in {"grounded", "researched"} and not links:
                 issues.append(f"Message {i+1}: grounded answer needs a citation")
-            if i // 2 + 1 != row.get("quality_policy", {}).get("closing_offer_turn", 0) and re.search(
-                "(?:\u0625\u0630\u0627|\u0627\u0630\u0627) (?:\u062a\u0628\u064a|\u0648\u062f\u0643)|\u0623\u0642\u062f\u0631 \u0623\u0634\u0631\u062d\u0647?\u0627? \u0644\u0643|\u062a\u0628\u064a (?:\u062a\u0641\u0627\u0635\u064a\u0644|\u0623\u0634\u0631\u062d|\u0623\u0648\u0636\u062d)", text):
+            if i // 2 + 1 != row.get("quality_policy", {}).get("closing_offer_turn", 0) and closing_offer(text):
                 issues.append(f"Message {i+1}: unassigned closing offer")
             for ref in library["references"]:
                 if ngrams(text) & ngrams(ref["assistant"]):
@@ -272,28 +290,48 @@ def checks(row, messages, library):
                     break
             phrases = ngrams(text, 5)
             for prev in messages[1:i:2]:
-                other = ngrams(prev.get("content", ""), 5)
+                other = ngrams(prev.get("content", "") if isinstance(prev, dict) else "", 5)
                 if phrases and len(phrases & other) / len(phrases | other) >= .72:
                     issues.append(f"Message {i+1}: near-duplicate earlier answer")
                     break
     return issues
 
 
+def closing_offer(text):
+    """Look for an offer in the ending, not an ordinary if-clause in instructions."""
+    ending = re.split(r"\n\s*\n", text.strip())[-1]
+    ending = ending[-400:]
+    return bool(re.search(
+        r"(?:إذا|اذا)\s+(?:تبي|ودك)[ ،,:]{1,6}(?:أقدر|اقدر|أشرح|اشرح|أعطيك|اعطيك|أجهز|تفاصيل|مثال|شرح|نرتب)|"
+        r"(?:تبي|ودك)\s+(?:تفاصيل|أشرح|اشرح|أوضح|اوضح|مثال)|أقدر\s+(?:أشرح|أوضح|أعطيك)\s+لك", ending))
+
+
 def batch_checks(rows):
-    """Detect exact and lexical clones across distinct topics, without model calls."""
+    """Inverted n-gram index avoids an all-pairs scan at dataset scale."""
     result = {r["seed_index"]: [] for r in rows}
-    previous = []
+    postings, exact, previous = {}, {}, []
     for row in rows:
         for msg in row["conversation"]["messages"][1::2]:
-            text = msg["content"]
+            text = msg.get("content", "")
+            if not isinstance(text, str) or not text.strip():
+                continue
             grams = ngrams(text, 5)
-            for seed, norm, other in previous:
-                if seed != row["seed_index"] and (normalized_question(text) == norm or
-                     (grams and other and len(grams & other) / len(grams | other) >= .72)):
+            norm = normalized_question(text)
+            candidates = set(exact.get(norm, []))
+            for gram in grams:
+                candidates.update(postings.get(gram, []))
+            for index in candidates:
+                seed, other_norm, other = previous[index]
+                if seed != row["seed_index"] and (norm == other_norm or
+                        (grams and other and len(grams & other) / len(grams | other) >= .72)):
                     result[row["seed_index"]].append(f"Answer clones seed {seed}")
                     result[seed].append(f"Answer clones seed {row['seed_index']}")
-            previous.append((row["seed_index"], normalized_question(text), grams))
-    return result
+            index = len(previous)
+            previous.append((row["seed_index"], norm, grams))
+            exact.setdefault(norm, []).append(index)
+            for gram in grams:
+                postings.setdefault(gram, []).append(index)
+    return {seed: list(dict.fromkeys(flags)) for seed, flags in result.items()}
 
 
 def review_failed(value):
@@ -320,8 +358,13 @@ class Requests:
             return self._spent()
 
     def _spent(self):
-        costs = [json.loads(p.read_text())["raw"].get("usage", {}).get("cost")
-                 for p in self.directory.glob("request-*.json")]
+        cache = getattr(self, "_cost_cache", {})
+        self._cost_cache = cache
+        paths = list(self.directory.glob("request-*.json"))
+        for p in paths:
+            if p.name not in cache:
+                cache[p.name] = json.loads(p.read_text())["raw"].get("usage", {}).get("cost")
+        costs = [cache[p.name] for p in paths]
         if any(c is None for c in costs):
             raise RuntimeError("Missing provider cost: reconcile usage before issuing more paid calls")
         uncertain = sum((Decimal(json.loads(p.read_text())["reserve_usd"])
@@ -331,7 +374,7 @@ class Requests:
     def unresolved(self):
         return list(self.directory.glob("*.unresolved")) + list(self.directory.glob("*.pending"))
 
-    def call(self, name, system, data, schema, max_tokens, temperature=.65):
+    def call(self, name, system, data, schema, max_tokens, temperature=.65, extra_tools=None):
         # Luna does not advertise temperature; require_parameters rejects it.
         payload = {"model": self.cfg["model"],
           "max_tokens": max_tokens, "provider": {"require_parameters": True},
@@ -340,6 +383,8 @@ class Requests:
           "response_format": {"type": "json_schema", "json_schema": {
               "name": "conversation" if "messages" in schema["properties"] else "review",
               "strict": True, "schema": schema}}}
+        if extra_tools:
+            payload["tools"] = extra_tools
         signature = digest(payload)
         dest = self.directory / ("request-" + name + ".json")
         pending = dest.with_suffix(".pending")
@@ -356,6 +401,8 @@ class Requests:
                 pricing = self.billing["pricing_usd_per_token"]
                 # Pending reservations count all in-flight workers under this lock.
                 reserve = Decimal(str(pricing["prompt"])) * len(json.dumps(payload).encode()) + Decimal(str(pricing["completion"])) * max_tokens
+                if extra_tools:
+                    reserve += Decimal("0.05") * len(extra_tools)
                 if self._spent() + reserve > Decimal(str(self.cfg["budget_usd"])):
                     raise RuntimeError("Pilot budget would be exceeded")
                 atomic_json(pending, {"request_sha256": signature, "reserve_usd": str(reserve)})
@@ -377,7 +424,7 @@ class Requests:
                 with self.lock:
                     atomic_json(dest.with_suffix(".http-error"), {"status": error.code,
                         "body": body, "request_sha256": signature})
-                    if error.code in {400, 401, 403, 404, 422}:
+                    if error.code in {400, 401, 403, 404, 422, 429}:
                         pending.unlink()  # Explicit request rejection; no completion issued.
                 raise
             # Persist before parsing: malformed/truncated completions are still paid.
@@ -468,10 +515,11 @@ def screen_conversation(seed, requests, library, sampled, cross_issues, cfg):
     initial_issues = checks(row, messages, library) + cross_issues
     issues = list(initial_issues)
     review = None
-    reasons = (["random_sample"] if index in sampled else []) + (["deterministic_flags"] if issues else [])
+    brief = row.get("domain") != "chitchat" and any(len(m.get("content", "").split()) < 15 for m in messages[1::2])
+    reasons = (["brief_answer_review"] if brief else []) + (["random_sample"] if index in sampled else []) + (["deterministic_flags"] if issues else [])
     # Known code defects go straight to repair, then get model review.
     # A separate judgment just to rediscover missing Markdown wastes a call.
-    if index in sampled and not issues:
+    if (index in sampled or brief) and not issues:
         review = requests.call(f"review-{index}", JUDGE, dict(context(row), messages=messages,
             deterministic_issues=issues, baseline_answer=row["baseline_answer"]), REVIEW_SCHEMA, 2400, .1)
         if review_failed(review):
@@ -535,7 +583,7 @@ def screen_conversations(generated, requests, library, sampled, cross, cfg, on_c
 def run(recipe_path, dry_run=False):
     cfg, seeds, library = plan(recipe_path)
     output = recipe_path.parent / cfg["output"]
-    sample = set(random.Random(cfg["seed"]).sample(range(len(seeds)), cfg["review_sample_size"]))
+    sample = set(random.Random(cfg["seed"]).sample([r["seed_index"] for r in seeds], cfg["review_sample_size"]))
     if dry_run:
         print(json.dumps({"conversations": len(seeds), "generation_concurrency": cfg["generation_concurrency"], "repair_concurrency": cfg["repair_concurrency"], "exchanges": dict(Counter(s["max_exchanges"] for s in seeds)), "assistant_turns": sum(s["max_exchanges"] for s in seeds), "sampled_review_seeds": sorted(sample), "domains": dict(Counter(s["domain"] for s in seeds))}))
         return
