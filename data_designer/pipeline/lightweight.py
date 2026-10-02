@@ -108,6 +108,9 @@ plain prose; don't demand Markdown or explanatory depth in casual conversation.
 A complete short answer or draft can be acceptable with fewer than 15 words.
 Do not demand padding, forced Markdown on short replies or a citation for general
 knowledge/task examples. Distinguish instructional conditionals from closing offers.
+Formatting should help the reader: clear prose, drafts and verse may be plain.
+Do not flag absent Markdown by itself; flag confusing organization when steps,
+code or a comparison actually need structure.
 For general mode assess stable knowledge directly; for grounded/researched mode
 check the supplied evidence. Cite specific faulty message numbers and claims in issues.
 Put only concrete defects that require repair in issues, not
@@ -149,7 +152,7 @@ def repairable_user_positions(messages, issues):
     for issue in issues:
         if issue.startswith("Repair "):
             continue
-        for number in re.findall(r"(?i)message\s+(\d+)", issue):
+        for number in re.findall(r"(?i)(?:message|الرسالة)\s+(\d+)", issue):
             index = int(number) - 1
             if 0 < index < len(messages) and index % 2 == 0:
                 positions.add(index)
@@ -272,12 +275,10 @@ def checks(row, messages, library):
         else:
             words = len(text.split())
             maximum = row.get("quality_policy", {}).get("max_answer_words", MAX_ANSWER_WORDS)
-            casual = row.get('domain') == 'chitchat'
-            minimum = 1
             if words > maximum:
                 issues.append(f"Message {i+1}: answer exceeds {maximum} word cap ({words})")
-            if not casual and words > 20 and not re.search(r"\*\*[^*]+\*\*|(?m:^#{1,3} |^[-*] |^\d+[.)] |^```)", text):
-                issues.append(f"Message {i+1}: missing useful Markdown")
+            # Useful formatting is contextual, so the model review assesses it.
+            # A character/word threshold was rejecting readable prose and drafts.
             links = re.findall(r"https?://[^\s)>\]]+", text)
             if any(url not in urls for url in links):
                 issues.append(f"Message {i+1}: citation outside approved URLs")

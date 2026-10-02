@@ -40,7 +40,9 @@ class LightweightTests(unittest.TestCase):
         messages[3]['content'] = 'Another friendly reply without forced formatting here.'
         self.assertEqual(checks(row, messages, {'references': []}), [])
         row['domain'] = 'science'
-        self.assertIn('missing useful Markdown', ' '.join(checks(row, messages, {'references': []})))
+        self.assertEqual(checks(row, messages, {'references': []}), [])
+        messages[1]['content'] += ' [invented](https://invented.test/fact)'
+        self.assertIn('citation outside approved URLs', ' '.join(checks(row, messages, {'references': []})))
 
     def row(self):
         return {"seed_index": 0, "first_question": "why?", "max_exchanges": 2,
@@ -128,6 +130,7 @@ class LightweightTests(unittest.TestCase):
         original[2] = {"role": "assistant", "content": ""}
         allowed = repairable_user_positions(original, ["Message 3: invalid role or blank content"])
         self.assertEqual(allowed, [2])
+        self.assertEqual(repairable_user_positions(original, ['الرسالة ٣: سؤال غير واضح', 'الرسالة 1: أصل السؤال']), [2])
         value = {"messages": self.messages()}
         corrected = apply_conversation_repair(self.row(), original, value, allowed)
         self.assertEqual(corrected[2]["role"], "user")

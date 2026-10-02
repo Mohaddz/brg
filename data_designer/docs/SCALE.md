@@ -32,6 +32,9 @@ checks all rows and model-reviews a reproducible 20% sample plus brief answers,
 flagged/repaired chats. Cross-batch clone detection excludes new duplicates.
 There are no manual content correction stages.
 
+Useful formatting is assessed contextually in model reviews. Plain prose and
+drafts are allowed; Markdown absence alone never triggers a paid repair.
+
 Preparation has an $8 provider-spend ceiling. The overall preparation/generation
 ceiling is $45, with at most $7 reserved per batch. In-flight calls reserve token
 cost and searches reserve additional fees. Unknown charges remain unresolved;
