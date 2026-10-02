@@ -433,7 +433,13 @@ class Requests:
                 atomic_json(dest, {"request_sha256": signature, "stage": name.split("-")[0],
                     "raw": raw, "created_at": datetime.now(timezone.utc).isoformat()})
                 pending.unlink()
-        if raw.get("error") or raw["choices"][0].get("finish_reason") != "stop":
+        finish = raw.get("choices", [{}])[0].get("finish_reason")
+        if finish == "length" and not extra_tools and not name.endswith("-extended"):
+            # Known paid truncation: preserve it and make one separately accounted
+            # larger call. Never replay an unresolved transport request.
+            return self.call(name+"-extended", system, data, schema,
+                min(65536, max(4800, max_tokens*2)), temperature)
+        if raw.get("error") or finish != "stop":
             raise ValueError("Incomplete completion retained for diagnosis")
         content = raw["choices"][0]["message"].get("content") or ""
         try:
@@ -441,6 +447,9 @@ class Requests:
         except json.JSONDecodeError:
             if extra_tools:
                 return {"research_text": content}
+            if not name.endswith("-extended"):
+                return self.call(name+"-extended", system, data, schema,
+                    min(65536, max(4800, max_tokens*2)), temperature)
             raise
 
     def report(self, output, completed):
